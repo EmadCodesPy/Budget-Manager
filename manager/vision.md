@@ -13,6 +13,6 @@ The web app is a budget manager made using OOP, sqlite3 and streamlit:
 -ust be able to clear all info
 -----------------------------------------------------------
 For the DB made with sqlite3:
--must be a users DB with (username(UNIQUE), name, password_hash, created_at)
--must be a transaction DB with (id(PRIMARY KEY AUTOINCREMENT), name, type(spending or earning), needed, date, created_at,
-                                (FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE))
+-~~must be a users DB with (username(UNIQUE), name, password_hash, created_at)~~
+-~~must be a transaction DB with (id(PRIMARY KEY AUTOINCREMENT), name, type(spending or earning), needed, created_at, username,~~
+                                ~~(FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE))~~

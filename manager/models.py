@@ -37,7 +37,11 @@ class DatabaseManager():
         conn.execute('PRAGMA foreign_keys = ON')
         return conn
     
-
+    def add_column(self, table, column_name, column_type):
+        conn = sqlite3.connect(self.db_path)
+        conn.execute(f'ALTER TABLE {table} ADD COLUMN {column_name} {column_type.upper()}')
+        conn.commit()
+        conn.close()
 
 class User():
     def __init__(self, username, name):
@@ -69,3 +73,42 @@ class User():
             return cls(username=username, name=row[1])     
         return False
     
+class Transaction():
+    def __init__(self, username):
+        self.username = username
+        self.db = DatabaseManager()
+    
+    def add_tx(self, name, type, needed, amount):
+        """Adding a transaction to a user"""
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('INSERT INTO transactions (name, type, needed, username, amount) VALUES (?,?,?,?,?)', (name, type, needed, self.username, amount))
+        conn.commit()
+        conn.close()
+
+    def get_tx(self):
+        """Getting the user transactions"""
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT id, name, type, needed, created_at, amount FROM transactions WHERE username=?', (self.username,))
+        transactions = c.fetchall()
+        conn.close()
+        return transactions
+
+    def delete_tx(self, tx_id):
+        """Deleting a transaction from a user by ID"""
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('DELETE FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
+        conn.commit()
+        conn.close()
+
+    
+
+user1 = User.login('test', '1')
+#new_tx = Transaction(user1.username, 'Dinner', 'Spending', 'Yes', 200)
+#new_tx.save_to_db()
+#dl_tx = Transaction(user1.username, 'Dinner', 'Spending', 'Yes', 200)
+tx1 = Transaction(user1.username)
+
+

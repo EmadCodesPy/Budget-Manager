@@ -86,6 +86,13 @@ class User():
         conn.commit()
         conn.close()
 
+    def delete_account(self) -> None:
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('DELETE FROM users WHERE username=?', (self.username,))
+        conn.commit()
+        conn.close()
+    
 
 
 class Transaction():

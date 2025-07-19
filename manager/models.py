@@ -16,14 +16,16 @@ class DatabaseManager():
                 name NOT NULL,
                 password_hash NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                total_budget INTEGER
+                total_budget INTEGER,
+                months INTEGER
         )
     ''')
         c.execute('''CREATE TABLE IF NOT EXISTS transactions (
                 id INTEGER UNIQUE PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 type TEXT NOT NULL,
-                needed TEXT,
+                needed INTEGER DEFAULT 0,
+                amount INTEGER NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 username TEXT NOT NULL,
                 FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
@@ -37,19 +39,22 @@ class DatabaseManager():
         conn.execute('PRAGMA foreign_keys = ON')
         return conn
     
-    def add_column(self, table, column_name, column_type):
+    def add_column(self, table: str, column_name: str, column_type: str) -> None:
         conn = sqlite3.connect(self.db_path)
         conn.execute(f'ALTER TABLE {table} ADD COLUMN {column_name} {column_type.upper()}')
         conn.commit()
         conn.close()
+    
+
 
 class User():
-    def __init__(self, username, name):
+    def __init__(self, username: str, name: str):
         self.username = username
         self.name = name
         self.db = DatabaseManager()
+
     @classmethod
-    def sign_up(cls, username, name, password):
+    def sign_up(cls, username: str, name: str, password: str) -> classmethod:
         """Create new user - Password is hashed immediately"""
         db = DatabaseManager()
         conn = db.get_connection()
@@ -59,8 +64,9 @@ class User():
         conn.commit()
         conn.close()
         return cls(username=username, name=name)
+    
     @classmethod
-    def login(cls, username, password):
+    def login(cls, username: str, password: str) -> classmethod:
         """Logs in existing user"""
         db = DatabaseManager()
         conn = db.get_connection()
@@ -73,12 +79,21 @@ class User():
             return cls(username=username, name=row[1])     
         return False
     
+    def allocate_budget(self, budget: int, months: int) -> None:
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('UPDATE users SET total_budget=?, months=? WHERE username=?', (budget, months, self.username))
+        conn.commit()
+        conn.close()
+
+
+
 class Transaction():
-    def __init__(self, username):
+    def __init__(self, username: str):
         self.username = username
         self.db = DatabaseManager()
     
-    def add_tx(self, name, type, needed, amount):
+    def add_tx(self, name: str, type: str, needed: int, amount: int) -> None:
         """Adding a transaction to a user"""
         conn = self.db.get_connection()
         c = conn.cursor()
@@ -86,7 +101,7 @@ class Transaction():
         conn.commit()
         conn.close()
 
-    def get_tx(self):
+    def get_tx(self) -> list:
         """Getting the user transactions"""
         conn = self.db.get_connection()
         c = conn.cursor()
@@ -95,7 +110,7 @@ class Transaction():
         conn.close()
         return transactions
 
-    def delete_tx(self, tx_id):
+    def delete_tx(self, tx_id: int) -> None:
         """Deleting a transaction from a user by ID"""
         conn = self.db.get_connection()
         c = conn.cursor()
@@ -104,11 +119,3 @@ class Transaction():
         conn.close()
 
     
-
-user1 = User.login('test', '1')
-#new_tx = Transaction(user1.username, 'Dinner', 'Spending', 'Yes', 200)
-#new_tx.save_to_db()
-#dl_tx = Transaction(user1.username, 'Dinner', 'Spending', 'Yes', 200)
-tx1 = Transaction(user1.username)
-
-

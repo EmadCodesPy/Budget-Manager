@@ -1,6 +1,13 @@
 import sqlite3
 import bcrypt
+import os
 
+
+def get_connection():
+    BASE_DIR = os.path.dirname(__file__)
+    db_path = os.path.join(BASE_DIR, 'budget_manage.db')
+    conn = sqlite3.connect(db_path)
+    return conn
 def initialize():
     conn = sqlite3.connect('budget_manager.db')
     c = conn.cursor()
@@ -9,7 +16,8 @@ def initialize():
               username UNIQUE PRIMARY KEY NOT NULL,
               name NOT NULL,
               password_hash NOT NULL,
-              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              total_budget INTEGER
     )
 ''')
     
@@ -24,5 +32,13 @@ def initialize():
     )
 ''')
     
+def create_user(username, name, password):
+    conn = get_connection()
+    c = conn.cursor()
+    hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+    c.execute('INSERT INTO users (username, name, password) VALUES (?,?,?)', (username, name, hashed_pw))
+    conn.commit()
+    conn.close()
+
 if __name__ == '__main__':
     initialize()

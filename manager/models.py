@@ -17,15 +17,16 @@ class DatabaseManager():
                 password_hash NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 total_budget INTEGER,
-                months INTEGER
+                start_month TEXT,
+                end_month TEXT
         )
     ''')
         c.execute('''CREATE TABLE IF NOT EXISTS transactions (
                 id INTEGER UNIQUE PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
-                type TEXT NOT NULL,
-                needed INTEGER DEFAULT 0,
+                type TEXT NOT NULL,               
                 amount INTEGER NOT NULL,
+                month TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 username TEXT NOT NULL,
                 FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
@@ -44,8 +45,6 @@ class DatabaseManager():
         conn.execute(f'ALTER TABLE {table} ADD COLUMN {column_name} {column_type.upper()}')
         conn.commit()
         conn.close()
-    
-
 
 class User():
     def __init__(self, username: str, name: str):
@@ -93,18 +92,17 @@ class User():
         conn.commit()
         conn.close()
     
-
-
 class Transaction():
     def __init__(self, username: str):
         self.username = username
         self.db = DatabaseManager()
     
-    def add_tx(self, name: str, type: str, needed: int, amount: int) -> None:
+    
+    def add_tx(self, name: str, type: str, amount: int) -> None:
         """Adding a transaction to a user"""
         conn = self.db.get_connection()
         c = conn.cursor()
-        c.execute('INSERT INTO transactions (name, type, needed, username, amount) VALUES (?,?,?,?,?)', (name, type, needed, self.username, amount))
+        c.execute('INSERT INTO transactions (name, type, username, amount) VALUES (?,?,?,?)', (name, type, self.username, amount))
         conn.commit()
         conn.close()
 
@@ -125,4 +123,5 @@ class Transaction():
         conn.commit()
         conn.close()
 
-    
+if __name__ == '__main__':
+    DatabaseManager()

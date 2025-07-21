@@ -38,6 +38,7 @@ class DatabaseManager():
                   amount REAL,
                   FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
         )''')
+
         conn.commit()
         conn.close()
     
@@ -66,6 +67,8 @@ class User():
         c = conn.cursor()
         hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
         c.execute('INSERT INTO users (username, name, password_hash) VALUES (?,?,?)', (username, name, hashed_pw))
+        for month in [datetime.date(2025, month, 1).strftime('%B') for month in range(1,13)]:
+            c.execute('INSERT INTO monthly_budget (username, month, amount)  VALUES (?,?,?)', (username, month, 0))
         conn.commit()
         conn.close()
         return cls(username=username, name=name)
@@ -79,6 +82,8 @@ class User():
         c.execute('SELECT password_hash, name FROM users WHERE username=?', (username,))
         row = c.fetchone()
         conn.close()
+        if row is None:
+            return False
         check_password = bcrypt.checkpw(password.encode(), row[0].encode())
         if check_password:
             return cls(username=username, name=row[1])     
@@ -91,6 +96,12 @@ class User():
         conn.commit()
         conn.close()
     
+    def account_start_date(self) -> str:
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT created_at FROM users WHERE username=?', (self.username,))
+        result = c.fetchone()
+        return result[0]
 class Transaction():
     def __init__(self, username: str)  -> None:
         self.username = username
@@ -172,6 +183,8 @@ class Transaction():
         c = conn.cursor()
         c.execute('SELECT month FROM monthly_budget WHERE username=?', (self.username,))
         result = c.fetchall()
+        if result is None:
+            return False
         return [month[0] for month in result]
 
     def get_total_budget(self) -> int:
@@ -182,6 +195,24 @@ class Transaction():
         if result[0] is None:
             return 0
         return result[0]
+
+    def get_total_spending(self) -> int:
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT amount FROM transactions WHERE username=? AND type=?', (self.username, 'Spending'))
+        result = c.fetchall()
+        if result is None:
+            return 0
+        return sum([x[0] for x in result])
+
+    def get_total_earning(self) -> int:
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT amount FROM transactions WHERE username=? AND type=?', (self.username, 'Earning'))
+        result = c.fetchall()
+        if result is None:
+            return 0
+        return sum([x[0] for x in result])
 
 if __name__ == '__main__':
     #user = User.sign_up('test','test','1')

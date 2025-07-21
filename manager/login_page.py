@@ -7,15 +7,15 @@ def Login():
     username = st.text_input('Username')
     password = st.text_input('Password', type='password')
     if st.button('Login'):
-        if User.login(username, password):
+        if username == '' or password == '':
+            st.error('Please fill in a username and password')
+        elif User.login(username, password):
             st.session_state.logged_in = True
             st.session_state.username = username
             st.session_state.name = username
             st.success('Logged in succesfully')
             time.sleep(1)
             st.rerun()
-        elif username == '' or password == '':
-            st.error('Please fill in a username and password')
         else:
             st.error('Invalid username or password')
 

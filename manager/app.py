@@ -8,7 +8,8 @@ def sidebar():
         st.markdown(f'**You are signed in as** {st.session_state.username}')
         account = st.sidebar.button('👤 Account')
         if account:
-            pass
+            st.session_state.account = True
+            st.rerun()
         with st.container(border=True):
             st.markdown('### Add Transaction' )
             name = st.text_input('Name', placeholder='...')
@@ -26,17 +27,18 @@ def sidebar():
                     st.info('Please fill in all fields')
 
 def page():
+    month_page()
+    pass
+
+def month_page():
     tx = Transaction(st.session_state.username)
     months = tx.get_months()
-    if not months:
-        st.warning('Head to your account page to allocate a budget')
     selected_month = st.selectbox(label='', options=months)
     st.session_state.month = selected_month
-    tx = Transaction(st.session_state.username)
     monthly_budget = round(tx.get_monthly_budget(selected_month),1)
-    if monthly_budget > 0:
+    if monthly_budget >= 0:
         st.markdown(f'### {monthly_budget}')
-    elif monthly_budget <= 0:
+    elif monthly_budget < 0:
         st.markdown(f'### :red[{monthly_budget}]')
     
 
@@ -46,9 +48,14 @@ def main():
         st.session_state.username = None
         st.session_state.name = None
         st.session_state.month = None
-    page_nav = st.navigation([st.Page('login_page.py', title='Login Page')], position='top')
+        st.session_state.account = False
+    page_nav_login = st.navigation([st.Page('login_page.py', title='Login Page')], position='top')
     if not st.session_state.logged_in:
-        page_nav.run()
+        page_nav_login.run()
+    elif st.session_state.account:
+        page_nav_account = st.navigation([st.Page('account_page.py', title='Account')])
+        page_nav_account.run()
+        pass
     else:
         sidebar()
         page()

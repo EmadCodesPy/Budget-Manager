@@ -2,6 +2,7 @@
 import sqlite3
 import os
 import bcrypt
+import datetime
 
 class DatabaseManager():
     def __init__(self):
@@ -16,9 +17,7 @@ class DatabaseManager():
                 name NOT NULL,
                 password_hash NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                total_budget INTEGER,
-                start_month TEXT,
-                end_month TEXT
+                total_budget INTEGER
         )
     ''')
         c.execute('''CREATE TABLE IF NOT EXISTS transactions (
@@ -32,6 +31,13 @@ class DatabaseManager():
                 FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
         )
     ''')
+        c.execute('''CREATE TABLE IF NOT EXISTS monthly_budget (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  username TEXT,
+                  month TEXT,
+                  amount REAL,
+                  FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+        )''')
         conn.commit()
         conn.close()
     
@@ -78,12 +84,6 @@ class User():
             return cls(username=username, name=row[1])     
         return False
     
-    def allocate_budget(self, budget: int, months: int) -> None:
-        conn = self.db.get_connection()
-        c = conn.cursor()
-        c.execute('UPDATE users SET total_budget=?, months=? WHERE username=?', (budget, months, self.username))
-        conn.commit()
-        conn.close()
 
     def delete_account(self) -> None:
         conn = self.db.get_connection()
@@ -106,11 +106,11 @@ class Transaction():
         conn.commit()
         conn.close()
 
-    def get_tx(self) -> list:
+    def get_tx(self, month: str) -> list:
         """Getting the user transactions"""
         conn = self.db.get_connection()
         c = conn.cursor()
-        c.execute('SELECT id, name, type, needed, created_at, amount FROM transactions WHERE username=?', (self.username,))
+        c.execute('SELECT id, name, type, needed, created_at, amount FROM transactions WHERE username=? AND month=?', (self.username, month))
         transactions = c.fetchall()
         conn.close()
         return transactions
@@ -122,6 +122,26 @@ class Transaction():
         c.execute('DELETE FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
         conn.commit()
         conn.close()
+    
+    def allocate_budget(self, budget: int, months: int) -> None:
+        monthly_budget = round(budget / months, 1)
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        for i in range(months):
+            month_name = datetime.date.today().replace(day=1).replace(month=(datetime.date.today().month + i-1)%12 + 1).strftime('%B')
+            c.execute('INSERT OR REPLACE INTO monthly_budget (username, month, amount) VALUES (?,?,?)', (self.username, month_name, monthly_budget))
+        conn.commit()
+        conn.close()
+    
+    def delete_budget(self):
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('DELETE FROM monthly_budget WHERE username=?', (self.username,))
+        conn.commit()
+        conn.close()
 
 if __name__ == '__main__':
-    DatabaseManager()
+    #user = User.sign_up('test','test','1')
+    #user = User.login('test', '1')
+    #tx = Transaction(user.username)
+    pass

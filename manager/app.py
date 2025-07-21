@@ -1,8 +1,7 @@
 from models import DatabaseManager, User, Transaction
 import streamlit as st
 from login_page import Login, Sign_Up
-
-
+import datetime
 
 def sidebar():
     with st.sidebar:
@@ -26,7 +25,9 @@ def sidebar():
                 else:
                     st.info('Please fill in all fields')
 
-
+def page():
+    months = [datetime.date(2025,m,1).strftime('%B') for m in range(1,13)]
+    selected_month = st.selectbox(label='', options=months)
 def main():
     if 'logged_in' not in st.session_state:
         st.session_state.logged_in = False
@@ -40,5 +41,6 @@ def main():
         pass
 
 if __name__ == '__main__':
-    main()
+    page()
+    #main()
     pass

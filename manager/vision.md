@@ -16,3 +16,9 @@ For the DB made with sqlite3:
 -~~must be a users DB with (username(UNIQUE), name, password_hash, created_at)~~
 -~~must be a transaction DB with (id(PRIMARY KEY AUTOINCREMENT), name, type(spending or earning), needed, created_at, username,~~
                                 ~~(FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE))~~
+-----------------------------------------------------------
+-when deleting a transaction, total_budget is updated
+-when adding a transaction, total_budget is updated
+-when adding a transaction, monthly_budget is updated
+-color changes to red when monthly budget below zero
+

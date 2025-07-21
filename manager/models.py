@@ -5,11 +5,11 @@ import bcrypt
 import datetime
 
 class DatabaseManager():
-    def __init__(self):
+    def __init__(self) -> None:
         self.db_path = os.path.join(os.path.dirname(__file__), 'budget_manager.db')
         self.initialize()
 
-    def initialize(self):
+    def initialize(self) -> None:
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS users (
@@ -41,7 +41,7 @@ class DatabaseManager():
         conn.commit()
         conn.close()
     
-    def get_connection(self):
+    def get_connection(self) -> None:
         conn = sqlite3.connect(self.db_path)
         conn.execute('PRAGMA foreign_keys = ON')
         return conn
@@ -53,7 +53,7 @@ class DatabaseManager():
         conn.close()
 
 class User():
-    def __init__(self, username: str, name: str):
+    def __init__(self, username: str, name: str) -> None:
         self.username = username
         self.name = name
         self.db = DatabaseManager()
@@ -83,7 +83,6 @@ class User():
         if check_password:
             return cls(username=username, name=row[1])     
         return False
-    
 
     def delete_account(self) -> None:
         conn = self.db.get_connection()
@@ -93,16 +92,25 @@ class User():
         conn.close()
     
 class Transaction():
-    def __init__(self, username: str):
+    def __init__(self, username: str)  -> None:
         self.username = username
-        self.db = DatabaseManager()
+        self.db = DatabaseManager()   
     
-    
-    def add_tx(self, name: str, type: str, amount: int) -> None:
+    def add_tx(self, name: str, type: str, amount: int, month: str) -> None:
         """Adding a transaction to a user"""
         conn = self.db.get_connection()
         c = conn.cursor()
-        c.execute('INSERT INTO transactions (name, type, username, amount) VALUES (?,?,?,?)', (name, type, self.username, amount))
+        c.execute('INSERT INTO transactions (name, type, username, amount, month) VALUES (?,?,?,?,?)', (name, type, self.username, amount, month))
+        if type == 'Earning':
+            monthly_budget = self.get_monthly_budget(month) + amount
+            total_budget = self.get_total_budget() + amount
+            c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (monthly_budget, self.username, month))
+            c.execute('UPDATE users SET total_budget=? WHERE username=?', (total_budget, self.username))
+        elif type == 'Spending':
+            monthly_budget = self.get_monthly_budget(month) - amount
+            total_budget = self.get_total_budget() - amount
+            c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (monthly_budget, self.username, month))
+            c.execute('UPDATE users SET total_budget=? WHERE username=?', (total_budget, self.username))
         conn.commit()
         conn.close()
 
@@ -115,33 +123,72 @@ class Transaction():
         conn.close()
         return transactions
 
-    def delete_tx(self, tx_id: int) -> None:
+    def delete_tx(self, tx_id: int = 0, all: bool = False) -> None:
         """Deleting a transaction from a user by ID"""
         conn = self.db.get_connection()
         c = conn.cursor()
+        if all == True:
+            c.execute('DELETE FROM transactions WHERE username=?', ( self.username,))
+        elif all == False:
+            c.execute('SELECT (type, amount) FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
+            result = c.fetchone()
+            if result[0] == 'Spending':
+                total_budget = self.get_total_budget() + result[1]
+                c.execute('UPDATE users SET total_budget=? WHERE username=?', (total_budget, self.username))
+            elif result[0] == 'Earning':
+                total_budget = self.get_total_budget() - result[1]
+                c.execute('UPDATE users SET total_budget=? WHERE username=?', (total_budget, self.username))
         c.execute('DELETE FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
         conn.commit()
         conn.close()
     
-    def allocate_budget(self, budget: int, months: int) -> None:
+    def allocate_budget(self, budget: int, months: int, refactor: bool = False) -> None:
         monthly_budget = round(budget / months, 1)
         conn = self.db.get_connection()
         c = conn.cursor()
+        c.execute('UPDATE users SET total_budget=? WHERE username=?', (budget, self.username))
         for i in range(months):
             month_name = datetime.date.today().replace(day=1).replace(month=(datetime.date.today().month + i-1)%12 + 1).strftime('%B')
             c.execute('INSERT OR REPLACE INTO monthly_budget (username, month, amount) VALUES (?,?,?)', (self.username, month_name, monthly_budget))
         conn.commit()
         conn.close()
     
-    def delete_budget(self):
+    def delete_budget(self) -> None:
         conn = self.db.get_connection()
         c = conn.cursor()
         c.execute('DELETE FROM monthly_budget WHERE username=?', (self.username,))
         conn.commit()
         conn.close()
 
+    def get_monthly_budget(self, month: str) -> int:
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT amount FROM monthly_budget WHERE username=? AND month=?', (self.username, month))
+        result = c.fetchone()
+        return result[0]
+    
+    def get_months(self) -> list:
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT month FROM monthly_budget WHERE username=?', (self.username,))
+        result = c.fetchall()
+        return [month[0] for month in result]
+
+    def get_total_budget(self) -> int:
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT total_budget FROM users WHERE username=?', (self.username,))
+        result = c.fetchone()
+        if result[0] is None:
+            return 0
+        return result[0]
+
 if __name__ == '__main__':
     #user = User.sign_up('test','test','1')
-    #user = User.login('test', '1')
-    #tx = Transaction(user.username)
+    user = User.login('test', '1')
+    tx = Transaction(user.username)
+    #tx.allocate_budget(500, 6)
+    tx.delete_budget()
+    tx.delete_tx(all=True)
+    #tx.add_tx('Lunch', 'Earning', 8, 'July')
     pass

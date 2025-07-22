@@ -49,22 +49,30 @@ def stat_grid():
     with col3:
         st.markdown(f'{(tx.get_total_earning()-tx.get_total_spending())}')
 
-def main():
-    user = User(st.session_state.username, st.session_state.name)
+def header():
     col1,col2 = st.columns([5,2])
     with col1:
         st.markdown('## 👤 Account')
     with col2:
         st.markdown('')
         remove_account()
-    st.divider()
+
+def account_info():
     with st.container(border=False):
         st.markdown(f'### **You are signed in as** {st.session_state.username}')
+
+def sidebar():
     with st.sidebar:
         overview_button = st.button('Back to Overview')
         if overview_button:
             st.session_state.account = False
             st.rerun()
+
+def main():
+    sidebar()
+    header()
+    st.divider()
+    account_info()
     st.divider()
     stat_grid()
 

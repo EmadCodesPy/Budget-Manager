@@ -1,7 +1,6 @@
 from models import DatabaseManager, User, Transaction
 import streamlit as st
 from login_page import Login, Sign_Up
-import datetime
 
 def sidebar():
     with st.sidebar:
@@ -39,8 +38,7 @@ def month_page():
     if monthly_budget >= 0:
         st.markdown(f'### {monthly_budget}')
     elif monthly_budget < 0:
-        st.markdown(f'### :red[{monthly_budget}]')
-    
+        st.markdown(f'### :red[{monthly_budget}]')   
 
 def main():
     if 'logged_in' not in st.session_state:

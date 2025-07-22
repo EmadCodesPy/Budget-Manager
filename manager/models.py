@@ -102,10 +102,11 @@ class User():
         c.execute('SELECT created_at FROM users WHERE username=?', (self.username,))
         result = c.fetchone()
         return result[0]
+
 class Transaction():
     def __init__(self, username: str)  -> None:
         self.username = username
-        self.db = DatabaseManager()   
+        self.db = DatabaseManager()
     
     def add_tx(self, name: str, type: str, amount: int, month: str) -> None:
         """Adding a transaction to a user"""

@@ -3,6 +3,7 @@ import sqlite3
 import os
 import bcrypt
 import datetime
+from exceptions import UsernameInUseError
 
 class DatabaseManager():
     def __init__(self) -> None:
@@ -66,12 +67,17 @@ class User():
         conn = db.get_connection()
         c = conn.cursor()
         hashed_pw = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-        c.execute('INSERT INTO users (username, name, password_hash) VALUES (?,?,?)', (username, name, hashed_pw))
+        try:
+            c.execute('INSERT INTO users (username, name, password_hash) VALUES (?,?,?)', (username, name, hashed_pw))
+        except sqlite3.IntegrityError:
+            conn.close()
+            raise UsernameInUseError('Username is already in use')
         for month in [datetime.date(2025, month, 1).strftime('%B') for month in range(1,13)]:
             c.execute('INSERT INTO monthly_budget (username, month, amount)  VALUES (?,?,?)', (username, month, 0))
         conn.commit()
         conn.close()
         return cls(username=username, name=name)
+        
     
     @classmethod
     def login(cls, username: str, password: str) -> classmethod:

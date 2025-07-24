@@ -1,0 +1,19 @@
+from nicegui import ui, app
+import sys
+sys.path.append('/Users/Emad/Desktop/Github port/Budget-Manager/manager')
+from pages.login_page import login_page
+from pages.dashboard import dashboard
+
+@ui.page('/')
+def show_login():
+    if app.storage.user['logged_in'] == True:
+        ui.navigate.to('/dashboard')
+        return
+    else:
+        login_page()
+
+@ui.page('/dashboard')
+def show_dashboard():
+    dashboard()
+
+ui.run(storage_secret='test')

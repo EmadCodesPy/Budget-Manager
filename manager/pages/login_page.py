@@ -1,7 +1,10 @@
 from nicegui import ui, app
+import sys
 from models import User
 from exceptions import UsernameInUseError
-import time
+
+sys.path.append('/Users/Emad/Desktop/Github port/Budget-Manager/manager')
+
 def login_page():
 
     def login():
@@ -10,8 +13,8 @@ def login_page():
             with ui.card().classes('w-full max-w-sm shadow-lg'):
                 ui.label('Login').classes('text-2xl font-bold mb-2 text-center')
 
-                username_input = ui.input('Username').props('type=email').classes('w-full')
-                password_input = ui.input('Password').props('type=password').classes('w-full')
+                username_input = ui.input('Username').classes('w-full')
+                password_input = ui.input('Password', password=True).classes('w-full')
                 
                 def handle_login():
                     if username_input.value == '' or password_input.value == '':
@@ -22,17 +25,15 @@ def login_page():
                         ui.notify('Invalid Username or Password', type='negative')
                         return           
                     ui.notify('Welcome', type='positive')
-                    
+
                     app.storage.user['logged_in'] = True
                     app.storage.user['username'] = user.username
                     app.storage.user['name'] = user.name
                     
+                    ui.navigate.to('/dashboard')
                 
                 ui.button('Log In', on_click=handle_login).classes('mt-4 w-full bg-blue-500 text-white hover:bg-blue-600')
-                time.sleep(1)
-                if app.storage.user['logged_in']:
-                    ui.navigate('/dashboard')
-                    return
+                
 
     def signup():
         with ui.column().classes('h-screen w-screen items-center mt-32'):

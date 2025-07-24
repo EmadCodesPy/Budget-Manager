@@ -6,7 +6,7 @@ from pages.dashboard import dashboard
 
 @ui.page('/')
 def show_login():
-    if app.storage.user['logged_in'] == True:
+    if app.storage.user.get('logged_in') == True:
         ui.navigate.to('/dashboard')
         return
     else:

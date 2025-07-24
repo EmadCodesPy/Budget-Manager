@@ -34,6 +34,10 @@ def dashboard():
                     if name_input.value == '' or type_input.value == '' or amount_input.value == '':
                         ui.notify('Please fill in all fields', type='warning')
                         return
+                    tx = Transaction(app.storage.user['username'])
+                    #Add month here after creating the selection
+                    tx.add_tx(name_input.value, type_input.value, amount_input.value, )
+                    ui.notify('Transaction added', type='positive')
                     
 
                 ui.button('Submit', on_click=handle_transaction).classes('w-full')

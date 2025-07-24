@@ -5,6 +5,8 @@ import bcrypt
 import datetime
 from exceptions import UsernameInUseError
 
+
+
 class DatabaseManager():
     def __init__(self) -> None:
         self.db_path = os.path.join(os.path.dirname(__file__), 'budget_manager.db')

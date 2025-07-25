@@ -1,9 +1,6 @@
 from nicegui import ui, app
-import sys
 from models import User
 from exceptions import UsernameInUseError
-
-sys.path.append('/Users/Emad/Desktop/Github port/Budget-Manager/manager')
 
 def login_page():
 

@@ -1,6 +1,4 @@
 from nicegui import ui, app
-import sys
-sys.path.append('/Users/Emad/Desktop/Github port/Budget-Manager/manager')
 from pages.login_page import login_page
 from pages.dashboard import dashboard
 

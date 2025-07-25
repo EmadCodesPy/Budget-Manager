@@ -74,8 +74,6 @@ class User():
         except sqlite3.IntegrityError:
             conn.close()
             raise UsernameInUseError('Username is already in use')
-        for month in [datetime.date(2025, month, 1).strftime('%B') for month in range(1,13)]:
-            c.execute('INSERT INTO monthly_budget (username, month, amount)  VALUES (?,?,?)', (username, month, 0))
         conn.commit()
         conn.close()
         return cls(username=username, name=name)

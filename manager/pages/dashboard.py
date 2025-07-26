@@ -45,22 +45,25 @@ def dashboard():
                 return
             months = tx.get_months()
             selected_month = months[0]
-            budget_label = ui.label().classes('text-9xl')
+            
+            with ui.row().classes('justify-between items-center w-full'):
 
-            def update_budget(month):
-                selected_month = month_dropdown.value
-                app.storage.user['month'] = selected_month
-                budget = tx.get_monthly_budget(selected_month)
-                if budget < 0:
-                    budget_label.text = f'{budget}'
-                    budget_label.classes('text-red')
-                else:
-                    budget_label.text = f'{budget}'
-                    budget_label.classes(remove='text-red')
+                def update_budget(month=None):
+                    selected_month = month_dropdown.value
+                    app.storage.user['month'] = selected_month
+                    budget = tx.get_monthly_budget(selected_month)
+                    formatted_budget = f"€{budget:.2f}"
+                   
+                    budget_label.text = f"Total Budget: {formatted_budget}"
+                    if budget < 0:
+                        budget_label.classes('text-red')
+                    else:
+                        budget_label.classes(remove='text-red')
 
-            month_dropdown = ui.select(months, value=selected_month, on_change=update_budget).classes('items-center max-w-sm text-5xl mt-8')
+                month_dropdown = ui.select(months, value=selected_month, on_change=update_budget).classes('text-xl p-2 rounded-md border border-gray-300')   
+                budget_label = ui.label().classes('text-3xl font-semibold')
 
-            update_budget(month_dropdown.value)
+                update_budget()
                 
     def main():
         left_drawer()

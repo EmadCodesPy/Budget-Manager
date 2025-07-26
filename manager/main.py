@@ -5,6 +5,7 @@ from pages.dashboard import dashboard
 @ui.page('/')
 def show_login():
     if app.storage.user.get('logged_in') == True:
+        ui.notify('Welcome', type='positive')
         ui.navigate.to('/dashboard')
         return
     else:

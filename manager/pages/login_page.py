@@ -27,6 +27,7 @@ def login_page():
                     app.storage.user['username'] = user.username
                     app.storage.user['name'] = user.name
                     
+                    ui.notify('Welcome', type='positive')
                     ui.navigate.to('/dashboard')
                 
                 ui.button('Log In', on_click=handle_login).classes('mt-4 w-full bg-blue-500 text-white hover:bg-blue-600')

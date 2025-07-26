@@ -32,8 +32,6 @@ def dashboard():
                     tx = Transaction(app.storage.user['username'])
                     tx.add_tx(name_input.value, type_input.value, amount_input.value, app.storage.user.get('month'))
                     ui.notify('Transaction added', type='positive')
-                    
-                
 
                 ui.button('Submit', on_click=handle_transaction).classes('w-full')
     
@@ -48,7 +46,8 @@ def dashboard():
             
             with ui.row().classes('justify-between items-center w-full'):
 
-                def update_budget(month=None):
+                #Function to dynamically update the budget shown on month change in dropdown
+                def update_budget():
                     selected_month = month_dropdown.value
                     app.storage.user['month'] = selected_month
                     budget = tx.get_monthly_budget(selected_month)

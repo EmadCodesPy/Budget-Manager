@@ -4,7 +4,7 @@ import os
 import bcrypt
 import datetime
 from exceptions import UsernameInUseError
-
+from dateutil.relativedelta import relativedelta
 
 
 class DatabaseManager():
@@ -78,10 +78,9 @@ class User():
         conn.close()
         return cls(username=username, name=name)
         
-    
     @classmethod
     def login(cls, username: str, password: str) -> classmethod:
-        """Logs in existing user"""
+        """Logs in existing user by comparing username and password to the database"""
         db = DatabaseManager()
         conn = db.get_connection()
         c = conn.cursor()
@@ -96,26 +95,20 @@ class User():
         return False
 
     def delete_account(self) -> None:
+        """Deletes all details of an account from the database"""
         conn = self.db.get_connection()
         c = conn.cursor()
         c.execute('DELETE FROM users WHERE username=?', (self.username,))
         conn.commit()
         conn.close()
     
-    def account_start_date(self) -> str:
-        conn = self.db.get_connection()
-        c = conn.cursor()
-        c.execute('SELECT created_at FROM users WHERE username=?', (self.username,))
-        result = c.fetchone()
-        return result[0]
-
 class Transaction():
     def __init__(self, username: str)  -> None:
         self.username = username
         self.db = DatabaseManager()
     
     def add_tx(self, name: str, type: str, amount: int, month: str) -> None:
-        """Adding a transaction to a user"""
+        """Adding a transaction to a user: Takes the name of the transaction, the type, the amount, and the month it was made in"""
         conn = self.db.get_connection()
         c = conn.cursor()
         c.execute('INSERT INTO transactions (name, type, username, amount, month) VALUES (?,?,?,?,?)', (name, type, self.username, amount, month))
@@ -133,7 +126,7 @@ class Transaction():
         conn.close()
 
     def get_tx(self, month: str) -> list:
-        """Getting the user transactions"""
+        """Getting the user transactions in a certain month"""
         conn = self.db.get_connection()
         c = conn.cursor()
         c.execute('SELECT id, name, type, needed, created_at, amount FROM transactions WHERE username=? AND month=?', (self.username, month))
@@ -161,17 +154,24 @@ class Transaction():
         conn.close()
     
     def allocate_budget(self, budget: int, months: int, refactor: bool = False) -> None:
+        """Allocates a total budget to a users account. It is possible"""
         monthly_budget = round(budget / months, 1)
+        today = datetime.date.today()
+
         conn = self.db.get_connection()
         c = conn.cursor()
         c.execute('UPDATE users SET total_budget=? WHERE username=?', (budget, self.username))
         for i in range(months):
-            month_name = datetime.date.today().replace(day=1).replace(month=(datetime.date.today().month + i-1)%12 + 1).strftime('%B')
-            c.execute('INSERT OR REPLACE INTO monthly_budget (username, month, amount) VALUES (?,?,?)', (self.username, month_name, monthly_budget))
+            # Adds i months to current date
+            month_date = today + relativedelta(months=i)
+            # Format 2025-January
+            month_key = month_date.strftime('%Y-%B')
+            c.execute('INSERT OR REPLACE INTO monthly_budget (username, month, amount) VALUES (?,?,?)', (self.username, month_key, monthly_budget))
         conn.commit()
         conn.close()
     
     def delete_budget(self) -> None:
+        """Removes all budget information from monthly_budget table"""
         conn = self.db.get_connection()
         c = conn.cursor()
         c.execute('DELETE FROM monthly_budget WHERE username=?', (self.username,))
@@ -179,6 +179,7 @@ class Transaction():
         conn.close()
 
     def get_monthly_budget(self, month: str) -> int:
+        """Returns the monthly budget for the month passes into month parameter"""
         conn = self.db.get_connection()
         c = conn.cursor()
         c.execute('SELECT amount FROM monthly_budget WHERE username=? AND month=?', (self.username, month))
@@ -186,6 +187,7 @@ class Transaction():
         return result[0]
     
     def get_months(self) -> list:
+        """Gets all the months that is in the monthly_budget table by username"""
         conn = self.db.get_connection()
         c = conn.cursor()
         c.execute('SELECT month FROM monthly_budget WHERE username=?', (self.username,))
@@ -195,6 +197,7 @@ class Transaction():
         return [month[0] for month in result]
 
     def get_total_budget(self) -> int:
+        """Returns the total budget of a user"""
         conn = self.db.get_connection()
         c = conn.cursor()
         c.execute('SELECT total_budget FROM users WHERE username=?', (self.username,))
@@ -203,30 +206,18 @@ class Transaction():
             return 0
         return result[0]
 
-    def get_total_spending(self) -> int:
+    def get_total_cash_flow(self, type: str = ['Spending', 'Earning']) -> int:
+        """Gets the total spending or earning of a user"""
         conn = self.db.get_connection()
         c = conn.cursor()
-        c.execute('SELECT amount FROM transactions WHERE username=? AND type=?', (self.username, 'Spending'))
+        c.execute('SELECT amount FROM transactions WHERE username=? AND type=?', (self.username, type))
         result = c.fetchall()
         if result is None:
             return 0
         return sum([x[0] for x in result])
 
-    def get_total_earning(self) -> int:
-        conn = self.db.get_connection()
-        c = conn.cursor()
-        c.execute('SELECT amount FROM transactions WHERE username=? AND type=?', (self.username, 'Earning'))
-        result = c.fetchall()
-        if result is None:
-            return 0
-        return sum([x[0] for x in result])
 
 if __name__ == '__main__':
-    #user = User.sign_up('test','test','1')
     user = User.login('test', '1')
     tx = Transaction(user.username)
-    #tx.allocate_budget(500, 6)
-    tx.delete_budget()
-    tx.delete_tx(all=True)
-    #tx.add_tx('Lunch', 'Earning', 8, 'July')
     pass

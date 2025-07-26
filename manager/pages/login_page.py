@@ -13,6 +13,7 @@ def login_page():
                 username_input = ui.input('Username').classes('w-full')
                 password_input = ui.input('Password', password=True).classes('w-full')
                 
+                #Function to validate login and save details to storage
                 def handle_login():
                     if username_input.value == '' or password_input.value == '':
                         ui.notify('Please enter Username and Password', type='info')
@@ -42,6 +43,7 @@ def login_page():
                 name_input = ui.input('Name').classes('w-full')
                 password_input = ui.input('Password').props('type=password').classes('w-full')
 
+                #Function to validate sign up of new user
                 def handle_signup():
                     if username_input.value == '' or name_input.value == '' or password_input.value == '':
                         ui.notify('Please fill in all fields', type='info')

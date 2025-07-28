@@ -135,26 +135,46 @@ class Transaction():
         conn.close()
         return all_transactions
 
-    def delete_tx(self, tx_id: int = 0, all: bool = False) -> None:
+    def delete_tx(self, tx_id: int = 0, month: str = None, all: bool = False) -> None:
         """Deleting a transaction from a user by ID"""
         conn = self.db.get_connection()
         c = conn.cursor()
+        #Delete all transactions
         if all == True:
-            c.execute('DELETE FROM transactions WHERE username=?', ( self.username,))
-        elif all == False:
-            c.execute('SELECT (type, amount) FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
-            result = c.fetchone()
-            if result[0] == 'Spending':
-                total_budget = self.get_total_budget() + result[1]
-                c.execute('UPDATE users SET total_budget=? WHERE username=?', (total_budget, self.username))
-            elif result[0] == 'Earning':
-                total_budget = self.get_total_budget() - result[1]
-                c.execute('UPDATE users SET total_budget=? WHERE username=?', (total_budget, self.username))
+            c.execute('DELETE FROM transactions WHERE username=?', (self.username,))
+            return
+        
+        #Select total budget for a user
+        c.execute('SELECT total_budget FROM users WHERE username=?', (self.username,))
+        #Comma exists because it returns a tuple. If there is no comma it will not unpack the tuple and current_budget[0] will need to be used
+        (current_total_budget,) = c.fetchone()
+
+        #Select transaction info for a transaction
+        c.execute('SELECT type, amount FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
+        tx_row = c.fetchone()
+
+        #Select amount in monthly_budget
+        c.execute('SELECT amount FROM monthly_budget WHERE username=? AND month=?', (self.username, month))
+        (current_monthly_budget,) = c.fetchone()
+
+        #Update the total_budget from the users table and amount from the monthly_budget table
+        if tx_row:
+            type_, amount = tx_row
+            if type_ == 'Spending':  
+                new_total_budget = current_total_budget + amount
+                new_monthly_budget = current_monthly_budget + amount
+            elif type_ == 'Earning':
+                new_total_budget = current_total_budget - amount
+                new_monthly_budget = current_monthly_budget - amount
+            #Update the total budget
+            c.execute('UPDATE users SET total_budget=? WHERE username=?', (new_total_budget, self.username))
+            c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (new_monthly_budget, self.username, month))
+        
         c.execute('DELETE FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
         conn.commit()
         conn.close()
     
-    def allocate_budget(self, budget: int, months: int, refactor: bool = False) -> None:
+    def allocate_budget(self, budget: int, months: int) -> None:
         """Allocates a total budget to a users account. It is possible"""
         monthly_budget = round(budget / months, 1)
         today = datetime.date.today()
@@ -221,4 +241,5 @@ class Transaction():
 if __name__ == '__main__':
     user = User.login('test', '1')
     tx = Transaction(user.username)
+    tx.delete_tx(54)
     pass

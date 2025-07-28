@@ -65,6 +65,10 @@ def dashboard():
                     budget_label.classes('text-red')
                 else:
                     budget_label.classes(remove='text-red')
+
+                update_tx = getattr(app.state, 'show_transactions', None)
+                if update_tx:
+                    update_tx()
             
             month_dropdown = ui.select(months, value=selected_month, on_change=update_budget).classes('text-xl p-2 rounded-md border border-gray-300 rounded-md')   
             budget_label = ui.label().classes('text-3xl font-semibold ')
@@ -75,21 +79,29 @@ def dashboard():
     def main_body():
         tx = Transaction(app.storage.user.get('username'))
                 
+        transaction_container = ui.column().classes('w-full')
 
         def show_transactions():
+            transaction_container.clear()
             transactions = tx.get_tx(app.storage.user.get('month'))
             for transaction in reversed(transactions):
                 bar_color = 'bg-green-500' if transaction['type'].lower() == 'earning' else 'bg-red-500'
-                with ui.row().classes('justify-between items-center w-full border p-2 rounded-lg'):
-                    with ui.row().classes('items-center'):
-                        ui.separator().classes(f'h-12 w-1 rounded-full justify-center {bar_color}')
-                        with ui.column().classes('justify-center'):
-                            ui.label(transaction['name']).classes('font-semibold')
-                            ui.label(transaction['created_at']).classes('text-grey-500 text-sm')
-                    with ui.row().classes('items-center gap-4'):
-                        ui.label(f"€{transaction['amount']:.2f}").classes('font-semibold text-xl')
-                        ui.button(icon='delete').props('flat dense round').classes('hover:text-red')
-        
+                with transaction_container:
+                    with ui.row().classes('justify-between items-center w-full border p-2 rounded-lg'):
+                        with ui.row().classes('items-center'):
+                            ui.separator().classes(f'h-12 w-1 rounded-full justify-center {bar_color}')
+                            with ui.column().classes('justify-center'):
+                                ui.label(transaction['name']).classes('font-semibold')
+                                ui.label(transaction['created_at']).classes('text-grey-500 text-sm')
+                        with ui.row().classes('items-center gap-4'):
+                            ui.label(f"€{transaction['amount']:.2f}").classes('font-semibold text-xl')
+                            def delete_transaction():
+                                tx.delete_tx(tx_id=transaction['id'], month=app.storage.user.get('month'))
+                                ui.notify('Transaction Deleted', type='positive')
+                                app.state.show_transactions()
+                                app.state.update_budget_func()
+                            ui.button(icon='delete', on_click=delete_transaction).props('flat dense round')
+        app.state.show_transactions = show_transactions
         show_transactions()
        
     def main():

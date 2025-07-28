@@ -1,23 +1,18 @@
 from nicegui import ui, app
-from models import User, Transaction
+from models import Transaction
 
 def dashboard():
 
     def left_drawer():
-        if not app.storage.user.get('logged_in') or not app.storage.user.get('username'):
-            ui.notify('Please log in first')
-            ui.navigate.to('/')
-            return
-
-        with ui.left_drawer(top_corner=True, bottom_corner=True).classes('border p-5'):
+        with ui.left_drawer(top_corner=True, bottom_corner=True).classes():
             ui.markdown(f"**You are signed in as** {app.storage.user['username']}")
-            ui.button('Account').classes('w-full')
+            ui.button('Account').classes('w-full').props('rounded outline')
             def logout():
                     ui.navigate.to('/')
                     app.storage.user['logged_in'] = False
                     app.storage.user['username'] = None
                     app.storage.user['name'] = None
-            ui.button('Logout', on_click=logout).classes('bg-red w-full')
+            ui.button('Logout', on_click=logout).classes('bg-red w-full text-white').props('rounded outline')
 
             with ui.card().classes('justify-center shadow-lg w-full mt-6'):
                 ui.markdown('### Add Transaction')
@@ -32,41 +27,80 @@ def dashboard():
                     tx = Transaction(app.storage.user['username'])
                     tx.add_tx(name_input.value, type_input.value, amount_input.value, app.storage.user.get('month'))
                     ui.notify('Transaction added', type='positive')
-
-                ui.button('Submit', on_click=handle_transaction).classes('w-full')
-    
-    def header():
-        with ui.header().classes('border p-5 bg-white text-black'):
-            tx = Transaction(app.storage.user.get('username'))
-            if not tx:
-                ui.navigate.to('/')
-                return
-            months = tx.get_months()
-            selected_month = months[0]
-            
-            with ui.row().classes('justify-between items-center w-full'):
-
-                #Function to dynamically update the budget shown on month change in dropdown
-                def update_budget():
-                    selected_month = month_dropdown.value
-                    app.storage.user['month'] = selected_month
-                    budget = tx.get_monthly_budget(selected_month)
-                    formatted_budget = f"€{budget:.2f}"
-                   
-                    budget_label.text = f"Total Budget: {formatted_budget}"
-                    if budget < 0:
-                        budget_label.classes('text-red')
-                    else:
-                        budget_label.classes(remove='text-red')
-
-                month_dropdown = ui.select(months, value=selected_month, on_change=update_budget).classes('text-xl p-2 rounded-md border border-gray-300')   
-                budget_label = ui.label().classes('text-3xl font-semibold')
-
-                update_budget()
+                    update_func = getattr(app.state, 'update_budget_func', None)
+                    show_tx = getattr(app.state, 'show_transactions', None)
+                    if update_func:
+                        update_func()
+                        show_tx()
                 
+                ui.button('Submit', on_click=handle_transaction).classes('w-full')
+            
+            
+            ui.switch('Dark Mode', on_change=ui.dark_mode().toggle).classes('absolute bottom-0 left-0')
+
+    def header():
+        tx = Transaction(app.storage.user.get('username'))
+        if not tx:
+            ui.navigate.to('/')
+            return
+        months = tx.get_months()
+        if not months:
+            ui.label('No budget yet').classes('text-red')
+            return
+        
+        selected_month = months[0]
+        
+        with ui.row().classes('justify-between items-center w-full'):
+
+            #Function to dynamically update the budget shown on month change in dropdown
+            def update_budget():
+                app.state.update_budget_func = update_budget
+                selected_month = month_dropdown.value
+                app.storage.user['month'] = selected_month
+                budget = tx.get_monthly_budget(selected_month)
+                formatted_budget = f"€{budget:.2f}"
+                
+                budget_label.text = f"Total Budget: {formatted_budget}"
+                if budget < 0:
+                    budget_label.classes('text-red')
+                else:
+                    budget_label.classes(remove='text-red')
+            
+            month_dropdown = ui.select(months, value=selected_month, on_change=update_budget).classes('text-xl p-2 rounded-md border border-gray-300 rounded-md')   
+            budget_label = ui.label().classes('text-3xl font-semibold ')
+
+            update_budget()
+            ui.separator().classes('glossy')
+
+    def main_body():
+        tx = Transaction(app.storage.user.get('username'))
+                
+
+        def show_transactions():
+            transactions = tx.get_tx(app.storage.user.get('month'))
+            for transaction in reversed(transactions):
+                bar_color = 'bg-green-500' if transaction['type'].lower() == 'earning' else 'bg-red-500'
+                with ui.row().classes('justify-between items-center w-full border p-2 rounded-lg'):
+                    with ui.row().classes('items-center'):
+                        ui.separator().classes(f'h-12 w-1 rounded-full justify-center {bar_color}')
+                        with ui.column().classes('justify-center'):
+                            ui.label(transaction['name']).classes('font-semibold')
+                            ui.label(transaction['created_at']).classes('text-grey-500 text-sm')
+                    with ui.row().classes('items-center gap-4'):
+                        ui.label(f"€{transaction['amount']:.2f}").classes('font-semibold text-xl')
+                        ui.button(icon='delete').props('flat dense round').classes('hover:text-red')
+        
+        show_transactions()
+       
     def main():
         left_drawer()
         header()
+        main_body()
+        
+    if not app.storage.user.get('logged_in') or not app.storage.user.get('username'):
+        ui.notify('Please log in first')
+        ui.navigate.to('/')
+        return
     
     main()
 

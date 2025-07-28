@@ -28,7 +28,7 @@ class DatabaseManager():
                 name TEXT NOT NULL,
                 type TEXT NOT NULL,               
                 amount INTEGER NOT NULL,
-                month TEXT,
+                month TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 username TEXT NOT NULL,
                 FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
@@ -125,14 +125,15 @@ class Transaction():
         conn.commit()
         conn.close()
 
-    def get_tx(self, month: str) -> list:
-        """Getting the user transactions in a certain month"""
+    def get_tx(self, month: str) -> dict:
+        """Getting the user transactions in a certain month. Gets the [id, name, type, amount, month, created_at]"""
         conn = self.db.get_connection()
         c = conn.cursor()
-        c.execute('SELECT id, name, type, needed, created_at, amount FROM transactions WHERE username=? AND month=?', (self.username, month))
-        transactions = c.fetchall()
+        c.execute('SELECT id, name, type, amount, month, created_at FROM transactions WHERE username=? AND month=?', (self.username, month))
+        columns = [col[0] for col in c.description]
+        all_transactions = [dict(zip(columns, row)) for row in c.fetchall()]
         conn.close()
-        return transactions
+        return all_transactions
 
     def delete_tx(self, tx_id: int = 0, all: bool = False) -> None:
         """Deleting a transaction from a user by ID"""

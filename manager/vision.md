@@ -11,6 +11,7 @@ The web app is a budget manager made using OOP, sqlite3 and streamlit:
 -count number of good and bad spending
 -show any type of chart that shows spending
 -must be able to clear all info
+-must be able to categorize different transactions by their names (pie chart maybe)
 -----------------------------------------------------------
 For the DB made with sqlite3:
 -~~must be a users DB with (username(UNIQUE), name, password_hash, created_at)~~

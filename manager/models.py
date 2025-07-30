@@ -31,14 +31,14 @@ class DatabaseManager():
                 month TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 username TEXT NOT NULL,
-                FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+                FOREIGN KEY (username, month) REFERENCES monthly_budget(username, month) ON DELETE CASCADE
         )
     ''')
         c.execute('''CREATE TABLE IF NOT EXISTS monthly_budget (
-                  id INTEGER PRIMARY KEY AUTOINCREMENT,
-                  username TEXT,
-                  month TEXT,
-                  amount REAL,
+                  username TEXT NOT NULL,
+                  month TEXT NOT NULL,
+                  amount REAL NOT NULL,
+                  PRIMARY KEY (username, month),
                   FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
         )''')
 
@@ -142,6 +142,8 @@ class Transaction():
         #Delete all transactions
         if all == True:
             c.execute('DELETE FROM transactions WHERE username=?', (self.username,))
+            conn.commit()
+            conn.close()
             return
         
         #Select total budget for a user
@@ -171,6 +173,7 @@ class Transaction():
             c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (new_monthly_budget, self.username, month))
         
         c.execute('DELETE FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
+        
         conn.commit()
         conn.close()
     
@@ -188,6 +191,7 @@ class Transaction():
             # Format 2025-January
             month_key = month_date.strftime('%Y-%B')
             c.execute('INSERT OR REPLACE INTO monthly_budget (username, month, amount) VALUES (?,?,?)', (self.username, month_key, monthly_budget))
+        
         conn.commit()
         conn.close()
     
@@ -196,6 +200,7 @@ class Transaction():
         conn = self.db.get_connection()
         c = conn.cursor()
         c.execute('DELETE FROM monthly_budget WHERE username=?', (self.username,))
+        c.execute('UPDATE users SET total_budget=? WHERE username=?', (None, self.username))
         conn.commit()
         conn.close()
 
@@ -205,6 +210,7 @@ class Transaction():
         c = conn.cursor()
         c.execute('SELECT amount FROM monthly_budget WHERE username=? AND month=?', (self.username, month))
         result = c.fetchone()
+        conn.close()
         return result[0]
     
     def get_months(self) -> list:
@@ -213,6 +219,7 @@ class Transaction():
         c = conn.cursor()
         c.execute('SELECT month FROM monthly_budget WHERE username=?', (self.username,))
         result = c.fetchall()
+        conn.close()
         if result is None:
             return False
         return [month[0] for month in result]
@@ -223,6 +230,7 @@ class Transaction():
         c = conn.cursor()
         c.execute('SELECT total_budget FROM users WHERE username=?', (self.username,))
         result = c.fetchone()
+        conn.close()
         if result[0] is None:
             return 0
         return result[0]
@@ -233,6 +241,7 @@ class Transaction():
         c = conn.cursor()
         c.execute('SELECT amount FROM transactions WHERE username=? AND type=?', (self.username, type))
         result = c.fetchall()
+        conn.close()
         if result is None:
             return 0
         return sum([x[0] for x in result])
@@ -241,5 +250,5 @@ class Transaction():
 if __name__ == '__main__':
     user = User.login('test', '1')
     tx = Transaction(user.username)
-    tx.delete_tx(54)
+    #tx.delete_tx(all=True)
     pass

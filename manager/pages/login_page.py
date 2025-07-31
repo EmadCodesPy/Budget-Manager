@@ -3,19 +3,30 @@ from models import User
 from exceptions import UsernameInUseError
 
 def login_page():
+    ui.add_head_html('''
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+    </style>
+    ''')
 
     def moneymanager_text():
-        with ui.column().classes('w-screen justify-center items-center absolute top-0 z-0 '):
+        with ui.column().classes('justify-center items-center absolute top-0 z-0'):
             opacity = [100,90,60,50,30,20,10]
             for x in opacity:                
                 ui.label('Welcome to MoneyManager').classes('bg-gradient-to-r from-cyan-400 to-blue-700')\
-                    .classes(f'bg-clip-text text-transparent text-6xl/[4.5rem] opacity-{x}')
+                    .classes(f'bg-clip-text text-transparent text-6xl/[4.5rem] opacity-{x} whitespace-nowrap')
+                    
+                    
 
     def login():
-
-        with ui.column().classes('w-screen items-center items-center'):
+        
+        with ui.column().classes('w-screen justify-center items-center'):
             moneymanager_text()
-            with ui.card().classes('w-full max-w-sm shadow-lg mt-32 mb-40'):
+            with ui.card().classes('w-full max-w-sm shadow-2xl mt-32 mb-40'):
                 ui.label('Login').classes('text-2xl font-bold mb-2 text-center')
 
                 username_input = ui.input('Username').classes('w-full caret-blue-500')
@@ -36,7 +47,6 @@ def login_page():
                     app.storage.user['username'] = user.username
                     app.storage.user['name'] = user.name
                     
-                    ui.notify('Welcome', type='positive')
                     ui.navigate.to('/dashboard')
                 
                 ui.button('Log In', on_click=handle_login).classes('mt-4 w-full bg-blue-500 text-white hover:bg-blue-600')\
@@ -44,9 +54,9 @@ def login_page():
                 
 
     def signup():
-        with ui.column().classes('h-screen w-screen items-center mt-32 z-10'):
+        with ui.column().classes('w-screen justify-center items-center'):
             moneymanager_text()
-            with ui.card().classes('w-full max-w-sm shadow-lg'):
+            with ui.card().classes('w-full max-w-sm shadow-2xl mt-32 mb-40'):
                 ui.label('Sign Up').classes('text-2xl font-bold mb-2 text-center')
 
                 username_input = ui.input('Username').classes('w-full caret-blue-500')
@@ -78,5 +88,8 @@ def login_page():
     with ui.tab_panels(tabs, value=log_in):
         with ui.tab_panel(log_in):
             login()
+            pass
         with ui.tab_panel(sign_up):
             signup()
+            pass
+

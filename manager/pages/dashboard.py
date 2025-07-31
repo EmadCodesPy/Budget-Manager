@@ -17,7 +17,7 @@ def dashboard():
                     app.storage.user['name'] = None
             ui.button('Logout', on_click=logout).classes('bg-red w-full text-white').props('rounded outline')
 
-            with ui.card().classes('justify-center shadow-lg w-full mt-6'):
+            with ui.card().classes('justify-center shadow-2xl w-full mt-6'):
                 ui.markdown('### Add Transaction')
                 name_input = ui.input('Name',placeholder='...').classes('w-full')
                 type_input = ui.select(options=['Spending', 'Earning'], label='Type',value='Spending').classes('w-full')

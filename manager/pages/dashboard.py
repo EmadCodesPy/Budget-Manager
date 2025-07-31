@@ -6,6 +6,8 @@ def dashboard():
 
     def left_drawer():
         with ui.left_drawer(top_corner=True, bottom_corner=True, elevated=True, value=True).classes():
+            ui.label('MoneyManager').classes('bg-gradient-to-r from-cyan-400 to-blue-700')\
+                    .classes(f'bg-clip-text text-transparent text-4xl')
             ui.markdown(f"**You are signed in as** {app.storage.user.get('username')}")
             ui.button('Account').classes('w-full').props('rounded outline')
             def logout():
@@ -34,7 +36,8 @@ def dashboard():
                         update_func()
                         show_tx()
                 
-                ui.button('Submit', on_click=handle_transaction).classes('w-full')
+                ui.button('Submit', on_click=handle_transaction).classes('w-full')\
+                .classes('transition ease-in-out duration-150 hover:-translate-y-1 hover:scale-105')
             
             
             ui.switch('Dark Mode', on_change=ui.dark_mode().toggle).classes('absolute bottom-0 left-0')

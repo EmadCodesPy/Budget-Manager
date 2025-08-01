@@ -5,16 +5,20 @@ from datetime import datetime
 def dashboard():
 
     def left_drawer():
-        with ui.left_drawer(top_corner=True, bottom_corner=True, elevated=True, value=True).classes():
+        with ui.left_drawer(top_corner=True, bottom_corner=True, elevated=True, value=True):
             ui.label('MoneyManager').classes('bg-gradient-to-r from-cyan-400 to-blue-700')\
                     .classes(f'bg-clip-text text-transparent text-4xl')
             ui.markdown(f"**You are signed in as** {app.storage.user.get('username')}")
-            ui.button('Account').classes('w-full').props('rounded outline')
+            def account():
+                ui.navigate.to('/account')
+                return
+            ui.button('Account', on_click=account).classes('w-full').props('rounded outline')
             def logout():
-                    ui.navigate.to('/')
-                    app.storage.user['logged_in'] = False
-                    app.storage.user['username'] = None
-                    app.storage.user['name'] = None
+                ui.navigate.to('/')
+                app.storage.user['logged_in'] = False
+                app.storage.user['username'] = None
+                app.storage.user['name'] = None
+                return
             ui.button('Logout', on_click=logout).classes('bg-red w-full text-white').props('rounded outline')
 
             with ui.card().classes('justify-center shadow-2xl w-full mt-6'):
@@ -75,7 +79,7 @@ def dashboard():
                 if update_tx:
                     update_tx()
             
-            month_dropdown = ui.select(months, value=selected_month, on_change=update_budget).classes('text-xl p-2 rounded-md border border-gray-300 rounded-md')   
+            month_dropdown = ui.select(months, value=selected_month, on_change=update_budget).classes('text-xl rounded-md')   
             budget_label = ui.label().classes('text-3xl font-semibold ')
 
             update_budget()
@@ -90,7 +94,8 @@ def dashboard():
             try:
                 transaction_container.clear()
             except:
-                pass
+                #ui.navigate.to('/')
+                return
             transactions = tx.get_tx(app.storage.user.get('month'))
             for transaction in reversed(transactions):
                 bar_color = 'bg-green-500' if transaction['type'].lower() == 'earning' else 'bg-red-500'

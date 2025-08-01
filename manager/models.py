@@ -114,14 +114,14 @@ class Transaction():
         c.execute('INSERT INTO transactions (name, type, username, amount, month) VALUES (?,?,?,?,?)', (name, type, self.username, amount, month))
         if type == 'Earning':
             monthly_budget = self.get_monthly_budget(month) + amount
-            total_budget = self.get_total_budget() + amount
+            #total_budget = self.get_total_budget() + amount
             c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (monthly_budget, self.username, month))
-            c.execute('UPDATE users SET total_budget=? WHERE username=?', (total_budget, self.username))
+            #c.execute('UPDATE users SET total_budget=? WHERE username=?', (total_budget, self.username))
         elif type == 'Spending':
             monthly_budget = self.get_monthly_budget(month) - amount
-            total_budget = self.get_total_budget() - amount
+            #total_budget = self.get_total_budget() - amount
             c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (monthly_budget, self.username, month))
-            c.execute('UPDATE users SET total_budget=? WHERE username=?', (total_budget, self.username))
+            #c.execute('UPDATE users SET total_budget=? WHERE username=?', (total_budget, self.username))
         conn.commit()
         conn.close()
 

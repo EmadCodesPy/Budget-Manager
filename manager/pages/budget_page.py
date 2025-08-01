@@ -6,7 +6,8 @@ def budget_page():
 
     with ui.column().classes('w-screen h-screen items-center justify-center'):
         ui.label('MoneyManager').classes('bg-gradient-to-r from-cyan-400 to-blue-700')\
-                .classes(f'bg-clip-text text-transparent text-4xl').tooltip('Back to dashboard').on(type='click', handler=ui.navigate.back)
+                .classes(f'bg-clip-text text-transparent text-4xl').tooltip('Back to account').on(type='click', handler=ui.navigate.back)\
+                .classes('transition ease-in-out hover:-translation-y-1 hover:scale-105')
         
         ui.label('Click above to go back').classes('text-sm text-grey')
         with ui.card().classes('w-screen max-w-sm shadow-2xl'):

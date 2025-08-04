@@ -213,7 +213,7 @@ class Transaction():
         conn.close()
         return result[0]
     
-    def get_months(self) -> list:
+    def get_months(self) -> list[str]:
         """Gets all the months that is in the monthly_budget table by username"""
         conn = self.db.get_connection()
         c = conn.cursor()
@@ -235,6 +235,17 @@ class Transaction():
             return 0
         return result[0]
 
+    def get_monthly_cash_flow(self, type: str = ['Spending', 'Earning'], month: str = None) -> int:
+        """Gets the total monthly spending or earning of a user"""
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT amount FROM transactions WHERE username=? AND type=? AND month=?', (self.username, type, month))
+        result = c.fetchall()
+        conn.close()
+        if result is None:
+            return 0
+        return sum([x[0] for x in result])
+
     def get_total_cash_flow(self, type: str = ['Spending', 'Earning']) -> int:
         """Gets the total spending or earning of a user"""
         conn = self.db.get_connection()
@@ -246,9 +257,58 @@ class Transaction():
             return 0
         return sum([x[0] for x in result])
 
+    def get_fixed_monthly_budget(self) -> int:
+        """Returns the monthly budget of each month, without including transactions made. The original fixed budget"""
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT total_budget FROM users WHERE username=?', (self.username,))
+        row = c.fetchone()
+        total_budget = row[0]if row else 0
+        c.execute('SELECT month FROM monthly_budget WHERE username=?', (self.username,))
+        row = c.fetchall()
+        number_of_months = len(row) if row else 0
+        conn.close()
+        fixed_monthly_budget = total_budget/number_of_months
+        return fixed_monthly_budget
+
+    def tx_piechart(self, month: str) -> list:
+        """Return the names and amounts of transactions as two lists: tx_names, tx_amount"""
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT name, amount FROM transactions WHERE username=? AND month=?', (self.username, month))
+        result = c.fetchall()
+        conn.close()
+        tx_names = [x[0] for x in result]
+        tx_amount = [x[1] for x in result]
+        return tx_names, tx_amount
+
+    def recent_tx(self, length: int) -> list[tuple]:
+        """Returns the most recent transactions (name, amount, type) up to the length parameter. (Assumes everything is entered in order)"""
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT name, amount, type FROM transactions WHERE username=?', (self.username,))
+        result = c.fetchall()
+        conn.close()
+        most_recent_tx = result[::-1][:length]
+        return most_recent_tx
+
+    def budget_progress(self, include_numbers: bool = False) -> int:
+        """Returns the ratio of amount spent and total budget (ratio). If include_numbers is True, it will also return the amount spend and the total_budget (ratio, amount_spent, total_budget)"""
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT total_budget FROM users WHERE username=?', (self.username,))
+        total_budget = c.fetchone()
+        c.execute('SELECT amount FROM transactions WHERE username=? AND type=?', (self.username, 'Spending'))
+        amount_spent_total = c.fetchall()
+        amount_spent = sum([x[0] for x in amount_spent_total])
+        conn.close()
+        ratio = (amount_spent / total_budget[0])
+        if include_numbers:
+            return ratio, amount_spent, total_budget[0]
+        return ratio
+
 
 if __name__ == '__main__':
     user = User.login('test', '1')
     tx = Transaction(user.username)
-    #tx.delete_tx(all=True)
     pass

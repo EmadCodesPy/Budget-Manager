@@ -2,7 +2,8 @@ from nicegui import ui, app
 from models import Transaction
 
 def budget_page():
-    
+    if app.storage.user.get('dark'):
+        ui.dark_mode().enable()
 
     with ui.column().classes('w-screen h-screen items-center justify-center'):
         ui.label('MoneyManager').classes('bg-gradient-to-r from-cyan-400 to-blue-700')\
@@ -14,7 +15,7 @@ def budget_page():
             tx = Transaction(app.storage.user.get('username'))
             ui.label('Please allocate your budget').classes('font-semibold text-2xl')
             ui.label('*This will delete all previous transactions information').classes('text-sm text-grey')
-            budget_input = ui.number('Budget', min=0, placeholder='$$$', format='%.2f').classes('w-full')
+            budget_input = ui.number('Budget', min=1, placeholder='$$$', format='%.2f').classes('w-full')
             if tx.get_total_budget():
                 ui.markdown(f'**Current budget:** €{tx.get_total_budget()}').classes('text-sm text-grey')
             month_input = ui.number('Months', min=1, placeholder='...').classes('w-full pb-4')

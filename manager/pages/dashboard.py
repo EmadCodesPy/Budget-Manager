@@ -3,6 +3,8 @@ from models import Transaction
 from datetime import datetime
 
 def dashboard():
+    if app.storage.user.get('dark'):
+        ui.dark_mode().enable()
 
     def left_drawer():
         with ui.left_drawer(top_corner=True, bottom_corner=True, elevated=True, value=True):
@@ -44,7 +46,7 @@ def dashboard():
                 .classes('transition ease-in-out duration-150 hover:-translate-y-1 hover:scale-105')
             
             
-            ui.switch('Dark Mode', on_change=ui.dark_mode().toggle).classes('absolute bottom-0 left-0')
+            
 
     def header():
         tx = Transaction(app.storage.user.get('username'))
@@ -96,7 +98,9 @@ def dashboard():
             except:
                 #ui.navigate.to('/')
                 return
+            
             transactions = tx.get_tx(app.storage.user.get('month'))
+            #Transaction card below
             for transaction in reversed(transactions):
                 bar_color = 'bg-green-500' if transaction['type'].lower() == 'earning' else 'bg-red-500'
                 with transaction_container:

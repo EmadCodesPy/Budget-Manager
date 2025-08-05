@@ -60,9 +60,8 @@ def dashboard():
             return
         
         selected_month = months[0]
-        
+    
         with ui.row().classes('justify-between items-center w-full'):
-
             #Function to dynamically update the budget shown on month change in dropdown
             def update_budget():
                 app.state.update_budget_func = update_budget
@@ -104,12 +103,12 @@ def dashboard():
             for transaction in reversed(transactions):
                 bar_color = 'bg-green-500' if transaction['type'].lower() == 'earning' else 'bg-red-500'
                 with transaction_container:
-                    with ui.row().classes('justify-between items-center w-full border p-2 rounded-lg'):
+                    with ui.row().classes('justify-between items-center w-full border p-2 rounded-lg transition ease-in-out hover:-translate-y-1'):
                         with ui.row().classes('items-center'):
                             ui.separator().classes(f'h-12 w-1 rounded-full justify-center {bar_color}')
                             with ui.column().classes('justify-center'):
                                 ui.label(transaction['name']).classes('font-semibold')
-                                ui.label(transaction['created_at']).classes('text-grey-500 text-sm')
+                                ui.label(transaction['created_at']).classes('text-gray-500 text-sm')
                         with ui.row().classes('items-center gap-4'):
                             ui.label(f"€{transaction['amount']:.2f}").classes('font-semibold text-xl')
                             def delete_transaction():

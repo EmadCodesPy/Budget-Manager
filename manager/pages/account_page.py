@@ -3,6 +3,7 @@ from models import User, Transaction
 from datetime import datetime
 import plotly.graph_objects as go
 import plotly.express as px
+from exceptions import UsernameInUseError
 
 def account_page():
     card_bg ='bg-gradient-to-r from-cyan-400 to-blue-700 opactiy-50 shadow-2xl p-6 w-full flex-1 text-white transition ease-in-out hover:-translate-y-1 hover:scale-105'
@@ -26,20 +27,70 @@ def account_page():
                 #Account detials whole card
                 with ui.card().classes('items-center w-full py-8').classes(card_bg):
                     with ui.row().classes('justify-between w-full'):
+                        user = User(app.storage.user.get('username'), app.storage.user.get('name'))
+                        #Username + name + username_edit + name_edit
                         with ui.column():
-                            ui.label(f"Username: {app.storage.user.get('username')}").classes('text-3xl font-semibold')
-                            ui.label(f"Name: {app.storage.user.get('name')}").classes('text-lg text-white')
+                            #Username
+                            with ui.row().classes('gap-2 items-center'):
+                                ui.label(f"Username: {app.storage.user.get('username')}").classes('text-3xl font-semibold')
+                                
+                                with ui.dialog() as edit_username_dialog, ui.card().classes('items-center gap-0'):
+                                    ui.label('Edit username below').classes('font-semibold text-xl')
+                                    new_username_input = ui.input('New Username').classes('w-full')
+                                    ui.markdown(f'**Current username:** {user.username}').classes('text-grey text-sm self-start')
+                                    with ui.row().classes('w-full items-center justify-center'):
+                                        ui.button('Submit', on_click=lambda: edit_username_dialog.submit(new_username_input.value))
+                                        ui.button('Cancel', on_click=lambda: edit_username_dialog.submit(''))
+                                
+                                async def edit_username():
+                                    new_username = await edit_username_dialog
+                                    if new_username == '' or new_username == None or new_username == app.storage.user.get('username'):
+                                        return
+                                    try:
+                                        user.update_username_or_name(new_username, 'username')
+                                        app.storage.user['username'] = new_username
+                                        ui.navigate.to('/account')
+                                        return
+                                    except UsernameInUseError:
+                                        ui.notify('Username already in use :(', type='negative')
+                                        return
+
+                                ui.icon('edit', size='1.2rem').classes('opacity-70 p-1 hover:bg-white/20 rounded-full').on('click', handler=edit_username)
+
+                            #Name
+                            with ui.row().classes('gap-2 items-center'):
+                                ui.label(f"Name: {app.storage.user.get('name')}").classes('text-lg text-white')
+                                
+                                with ui.dialog() as edit_name_dialog, ui.card().classes('items-center gap-0'):
+                                    ui.label('Edit name below').classes('font-semibold text-xl')
+                                    new_name_input = ui.input('New Name').classes('w-full')
+                                    ui.markdown(f'**Current name:** {user.name}').classes('text-grey text-sm self-start')
+                                    with ui.row().classes('w-full items-center justify-center'):
+                                        ui.button('Submit', on_click=lambda: edit_name_dialog.submit(new_name_input.value))
+                                        ui.button('Cancel', on_click=lambda: edit_name_dialog.submit(''))
+                                
+                                async def edit_name():
+                                    new_name = await edit_name_dialog
+                                    if new_name == '' or new_name == None or new_name == app.storage.user.get('name'):
+                                        return
+                                    user.update_username_or_name(new_name, 'name')
+                                    app.storage.user['name'] = new_name
+                                    ui.navigate.to('/account')
+                                    return
+
+                                ui.icon('edit', size='1rem').classes('opacity-70 p-1 hover:bg-white/20 rounded-full').on('click', handler=edit_name)
+                        
                         with ui.column():
                             #Delete confirmation Dialog
-                            with ui.dialog() as dialog, ui.card().classes('items-center'):
+                            with ui.dialog() as delete_dialog, ui.card().classes('items-center'):
                                 ui.label('Are you sure you want to delete your account?').classes('font-semibold text-xl')
                                 ui.label('*This can\'t be reversed').classes('text-sm text-grey')
                                 with ui.row().classes('justify-between'):
-                                    ui.button('Yes', on_click=lambda: dialog.submit('Yes')).classes('bg-red text-white')
-                                    ui.button('No', on_click=lambda: dialog.submit('No'))
+                                    ui.button('Yes', on_click=lambda: delete_dialog.submit('Yes')).classes('bg-red text-white')
+                                    ui.button('No', on_click=lambda: delete_dialog.submit('No'))
                             
-                            async def delete_dialog():
-                                result = await dialog
+                            async def delete_user():
+                                result = await delete_dialog
                                 if result == 'Yes':
                                     user = User(app.storage.user.get('username'), app.storage.user.get('name'))
                                     user.delete_account()
@@ -47,13 +98,10 @@ def account_page():
                                     return
                                 else:
                                     return 
-                            ui.button('Delete Account', on_click=delete_dialog).classes('bg-red text-white').props('rounded outline')\
+                            
+                            ui.button('Delete Account', on_click=delete_user).classes('bg-red text-white').props('rounded outline')\
                             .classes('transition ease-in-out hover:-translate-y-1 hover:scale-105')
 
-                            def edit_account():
-                                pass
-                            ui.button('Edit', on_click=lambda: ui.notify('Working on this')).props('rounded').classes('w-full')\
-                            .classes('transition ease-in-out hover:-translate-y-1 hover:scale-105')
                 
             #Stat card row
             with ui.row().classes('w-full max-w-5xl justify-around items-center'):
@@ -64,22 +112,22 @@ def account_page():
                         .classes('hover:bg-white/20 rounded-full cursor-pointer').tooltip('Edit')
                         ui.icon('account_balance_wallet', size='2rem')
                         total_budget = tx.get_total_budget()
-                        ui.label(f'€{total_budget}').classes('text-xl')
+                        ui.label(f'€{total_budget:.1f}').classes('text-xl')
                         ui.label('Total Budget').classes('text-2xl')
                 #Account months budget
                 with ui.card().classes(card_bg):
                     with ui.column().classes('w-full items-center'):
                         ui.icon('money', size='2rem')
                         monetly_budget = tx.get_fixed_monthly_budget()
-                        ui.label(f'€{monetly_budget}').classes('text-xl')
+                        ui.label(f'€{monetly_budget:.1f}').classes('text-xl')
                         ui.label('This months budget').classes('text-2xl')
                 #Account months Spending
                 with ui.card().classes(card_bg):
                     with ui.column().classes('w-full items-center'):
                         ui.icon('trending_down', size='2rem')
                         month = datetime.now().strftime('%Y-%B')
-                        savings = tx.get_monthly_cash_flow(type='Spending', month=month)
-                        ui.label(f'€{savings}').classes('text-xl')
+                        spending = tx.get_monthly_cash_flow(type='Spending', month=month)
+                        ui.label(f'€{spending:.1f}').classes('text-xl')
                         ui.label('This months spending').classes('text-2xl')
 
             #Bottom stat row
@@ -205,7 +253,8 @@ def account_page():
                                                                     hole=0.3,
                                                                     hovertemplate='%{label}: €%{value} <extra></extra>',
                                                                     marker=dict(colors=px.colors.sequential.Blues[::-1]),
-                                                                    showlegend=False
+                                                                    showlegend=False,
+                                                                    title='Spending'
                                                                     )
                                                                 ]
                                                             )                               

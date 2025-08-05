@@ -31,7 +31,7 @@ class DatabaseManager():
                 month TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 username TEXT NOT NULL,
-                FOREIGN KEY (username, month) REFERENCES monthly_budget(username, month) ON DELETE CASCADE
+                FOREIGN KEY (username, month) REFERENCES monthly_budget(username, month) ON DELETE CASCADE ON UPDATE CASCADE
         )
     ''')
         c.execute('''CREATE TABLE IF NOT EXISTS monthly_budget (
@@ -39,7 +39,7 @@ class DatabaseManager():
                   month TEXT NOT NULL,
                   amount REAL NOT NULL,
                   PRIMARY KEY (username, month),
-                  FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+                  FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE
         )''')
 
         conn.commit()
@@ -102,6 +102,26 @@ class User():
         conn.commit()
         conn.close()
     
+    def update_username_or_name(self, new_username_or_name: str, column: str) -> None:
+        """Update the username or name of a user"""
+        if column not in ('username', 'name'):
+            raise ValueError('Need to be a username or name')
+        
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        try:
+            c.execute(f'UPDATE users SET {column}=? WHERE username=?', (new_username_or_name, self.username))
+            conn.commit()
+        except sqlite3.IntegrityError:
+            conn.close()
+            raise UsernameInUseError('Username already in user')        
+        conn.close()
+        if column == 'username':
+            self.username = new_username_or_name
+        elif column == 'name':
+            self.name = new_username_or_name
+        return
+
 class Transaction():
     def __init__(self, username: str)  -> None:
         self.username = username

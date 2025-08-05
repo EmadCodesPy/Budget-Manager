@@ -1,4 +1,10 @@
 The web app is a budget manager made using OOP, sqlite3 and streamlit:
+-Need add to savings
+        savings table, has: amount, month, username
+-count number of good and bad spending (Spending V Earning in month statistics)
+-must be able to clear all info
+-~~Need to add edit account stuff~~
+-~~Add dark mode to account page~~
 -~~It must be able to CRUD (create, read, update, delete)~~
 -~~input amount of money, and then amount of months you want it to last~~
 -~~be able to add costs that will be subtracted from the monthly budget~~
@@ -7,9 +13,7 @@ The web app is a budget manager made using OOP, sqlite3 and streamlit:
 -~~see what transactions you've made~~
 -~~remove transactions~~
 -~~know if transaction was good or bad (green or red)~~
-        -count number of good and bad spending
 -~~show any type of chart that shows spending~~
-        -must be able to clear all info
 -~~must be able to categorize different transactions by their names (pie chart maybe)~~
 -~~When no budget, a enter budget and months page appears~~
 -----------------------------------------------------------

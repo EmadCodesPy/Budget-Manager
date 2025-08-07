@@ -101,14 +101,13 @@ def account_page():
                             
                             ui.button('Delete Account', on_click=delete_user).classes('bg-red text-white').props('rounded outline')\
                             .classes('transition ease-in-out hover:-translate-y-1 hover:scale-105')
-
-                
+               
             #Stat card row
             with ui.row().classes('w-full max-w-5xl justify-around items-center'):
                 #Account total budget
                 with ui.card().classes(card_bg):
                     with ui.column().classes('w-full items-center'):
-                        ui.icon('edit', size='1.2rem').classes('self-start absolute top-3 left-3 p-2').on('click', handler=lambda: ui.navigate.to('/budget'))\
+                        ui.icon('edit', size='1.2rem').classes('self-start absolute top-3 left-3 p-2 opacity-70').on('click', handler=lambda: ui.navigate.to('/budget'))\
                         .classes('hover:bg-white/20 rounded-full cursor-pointer').tooltip('Edit')
                         ui.icon('account_balance_wallet', size='2rem')
                         total_budget = tx.get_total_budget()

@@ -26,15 +26,31 @@ def dashboard():
             with ui.card().classes('justify-center shadow-2xl w-full mt-6'):
                 ui.markdown('### Add Transaction')
                 name_input = ui.input('Name',placeholder='...').classes('w-full')
-                type_input = ui.select(options=['Spending', 'Earning'], label='Type',value='Spending').classes('w-full')
-                amount_input = ui.number("Amount", min=0, format='%.2f').classes('w-full')
+                amount_input = ui.number("Amount", min=0, format='%.2f').classes('w-full pb-4')
+                
+                #CSS to adjust button group size
+                ui.add_head_html("""
+                                <style>
+                                 .q-btn-group {
+                                    max-width: 236px;
+                                 }
+                                 .q-btn-group .q-btn {
+                                    font-size: 0.75rem;
+                                    max-width: 78.6px;
+                                    /*max-width: px;*/
+                                 }
+                                 </style>
+                                """)
+
+                with ui.row().classes('w-full text-xs pb-1'):
+                    type_tx = ui.toggle(['Spending', 'Earning', 'Savings']).props('push')
 
                 def handle_transaction():
-                    if name_input.value == '' or type_input.value == '' or amount_input.value == '':
+                    if name_input.value == '' or type_tx.value == None or amount_input.value == '':
                         ui.notify('Please fill in all fields', type='warning')
                         return
                     tx = Transaction(app.storage.user.get('username'))
-                    tx.add_tx(name_input.value, type_input.value, amount_input.value, app.storage.user.get('month'))
+                    tx.add_tx(name_input.value, type_tx.value, amount_input.value, app.storage.user.get('month'))
                     ui.notify('Transaction added', type='positive')
                     update_func = getattr(app.state, 'update_budget_func', None)
                     show_tx = getattr(app.state, 'show_transactions', None)
@@ -44,10 +60,7 @@ def dashboard():
                 
                 ui.button('Submit', on_click=handle_transaction).classes('w-full')\
                 .classes('transition ease-in-out duration-150 hover:-translate-y-1 hover:scale-105')
-            
-            
-            
-
+                        
     def header():
         tx = Transaction(app.storage.user.get('username'))
         if not tx:

@@ -331,4 +331,5 @@ class Transaction():
 if __name__ == '__main__':
     user = User.login('test', '1')
     tx = Transaction(user.username)
+    tx.delete_tx(all=True)
     pass

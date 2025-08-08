@@ -114,6 +114,8 @@ def dashboard():
             transactions = tx.get_tx(app.storage.user.get('month'))
             #Transaction card below
             for transaction in reversed(transactions):
+                if transaction['type'] == 'Savings':
+                    continue
                 bar_color = 'bg-green-500' if transaction['type'].lower() == 'earning' else 'bg-red-500'
                 with transaction_container:
                     with ui.row().classes('justify-between items-center w-full border p-2 rounded-lg transition ease-in-out hover:-translate-y-1'):

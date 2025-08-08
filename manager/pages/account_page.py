@@ -136,7 +136,7 @@ def account_page():
                     #Month overview
                     with ui.card().classes(card_bg):
                         with ui.column().classes('w-full'):
-                            ui.label('Month Overview').classes('text-2xl underline underline-offset-8')
+                            ui.label('Month Overview').classes('self-center text-2xl underline underline-offset-8')
                             months_unsorted = tx.get_months()
                             months = sorted(months_unsorted, key=lambda m: datetime.strptime(m, '%Y-%B'))
                             selected_month = months[0]
@@ -227,7 +227,7 @@ def account_page():
                 # Month statistics
                 with ui.column().classes('w-full flex-1 h-full max-h-'):
                     with ui.card().classes(card_bg):
-                        ui.label('Month statistics').classes('text-2xl underline underline-offset-8')
+                        ui.label('Month statistics').classes('self-center text-2xl underline underline-offset-8')
                         piechart_container = ui.column().classes('w-full max-w-lg')
                         #Render piechart
                         def draw_piechart(month):

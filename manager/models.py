@@ -182,6 +182,11 @@ class Transaction():
         #Update the total_budget from the users table and amount from the monthly_budget table
         if tx_row:
             type_, amount = tx_row
+            if type_ == 'Savings':
+                c.execute('DELETE FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
+                conn.commit()
+                conn.close()
+                return
             if type_ == 'Spending':  
                 new_total_budget = current_total_budget + amount
                 new_monthly_budget = current_monthly_budget + amount
@@ -192,7 +197,7 @@ class Transaction():
             c.execute('UPDATE users SET total_budget=? WHERE username=?', (new_total_budget, self.username))
             c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (new_monthly_budget, self.username, month))
         
-        c.execute('DELETE FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
+            c.execute('DELETE FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
         
         conn.commit()
         conn.close()

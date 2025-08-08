@@ -55,8 +55,8 @@ def dashboard():
                     update_func = getattr(app.state, 'update_budget_func', None)
                     show_tx = getattr(app.state, 'show_transactions', None)
                     if update_func:
-                        update_func()
-                        show_tx()
+                        update_func.refresh()
+                        show_tx.refresh()
                 
                 ui.button('Submit', on_click=handle_transaction).classes('w-full')\
                 .classes('transition ease-in-out duration-150 hover:-translate-y-1 hover:scale-105')
@@ -76,6 +76,7 @@ def dashboard():
     
         with ui.row().classes('justify-between items-center w-full'):
             #Function to dynamically update the budget shown on month change in dropdown
+            @ui.refreshable
             def update_budget():
                 app.state.update_budget_func = update_budget
                 selected_month = month_dropdown.value
@@ -91,7 +92,7 @@ def dashboard():
 
                 update_tx = getattr(app.state, 'show_transactions', None)
                 if update_tx:
-                    update_tx()
+                    update_tx.refresh()
             
             month_dropdown = ui.select(months, value=selected_month, on_change=update_budget).classes('text-xl rounded-md')   
             budget_label = ui.label().classes('text-3xl font-semibold ')
@@ -102,22 +103,13 @@ def dashboard():
     def main_body():
         tx = Transaction(app.storage.user.get('username'))
                 
-        transaction_container = ui.column().classes('w-full')
-        
+        @ui.refreshable
         def show_transactions():
-            try:
-                transaction_container.clear()
-            except:
-                #ui.navigate.to('/')
-                return
-            
             transactions = tx.get_tx(app.storage.user.get('month'))
             #Transaction card below
             for transaction in reversed(transactions):
-                if transaction['type'] == 'Savings':
-                    continue
                 bar_color = 'bg-green-500' if transaction['type'].lower() == 'earning' else 'bg-red-500'
-                with transaction_container:
+                with ui.column().classes('w-full'):
                     with ui.row().classes('justify-between items-center w-full border p-2 rounded-lg transition ease-in-out hover:-translate-y-1'):
                         with ui.row().classes('items-center'):
                             ui.separator().classes(f'h-12 w-1 rounded-full justify-center {bar_color}')
@@ -129,10 +121,12 @@ def dashboard():
                             def delete_transaction():
                                 tx.delete_tx(tx_id=transaction['id'], month=app.storage.user.get('month'))
                                 ui.notify('Transaction Deleted', type='positive')
-                                app.state.show_transactions()
+                                app.state.show_transactions.refresh()
                                 app.state.update_budget_func()
                             ui.button(icon='delete', on_click=delete_transaction).props('flat dense round')
+        
         app.state.show_transactions = show_transactions
+        
         show_transactions()
        
     def dashboard_main():

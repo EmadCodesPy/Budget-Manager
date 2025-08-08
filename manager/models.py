@@ -194,7 +194,7 @@ class Transaction():
                 new_total_budget = current_total_budget - amount
                 new_monthly_budget = current_monthly_budget - amount
             #Update the total budget
-            c.execute('UPDATE users SET total_budget=? WHERE username=?', (new_total_budget, self.username))
+            #c.execute('UPDATE users SET total_budget=? WHERE username=?', (new_total_budget, self.username))
             c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (new_monthly_budget, self.username, month))
         
             c.execute('DELETE FROM transactions WHERE id=? AND username=?', (tx_id, self.username))

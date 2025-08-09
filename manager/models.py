@@ -188,10 +188,8 @@ class Transaction():
                 conn.close()
                 return
             if type_ == 'Spending':  
-                new_total_budget = current_total_budget + amount
                 new_monthly_budget = current_monthly_budget + amount
             elif type_ == 'Earning':
-                new_total_budget = current_total_budget - amount
                 new_monthly_budget = current_monthly_budget - amount
             #Update the total budget
             #c.execute('UPDATE users SET total_budget=? WHERE username=?', (new_total_budget, self.username))

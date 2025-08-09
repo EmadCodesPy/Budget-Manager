@@ -4,5 +4,5 @@
 
 -you can ignore everything else as I am still working on it
 
-Run the main.py file to actually see how it all works
+###Run the main.py file to actually see how it all works
 

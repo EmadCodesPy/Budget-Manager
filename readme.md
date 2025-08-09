@@ -1,4 +1,4 @@
-###Run the main.py file to actually see how it all works
+### Run the main.py file to actually see how it all works
 
 -Models.py includes all the backend logic
 

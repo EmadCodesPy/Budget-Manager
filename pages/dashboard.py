@@ -105,7 +105,7 @@ def dashboard():
                 
         @ui.refreshable
         def show_transactions():
-            transactions = tx.get_tx(app.storage.user.get('month'))
+            transactions = tx.get_tx(app.storage.user.get('month'), incl_savings=False)
             #Transaction card below
             for transaction in reversed(transactions):
                 bar_color = 'bg-green-500' if transaction['type'].lower() == 'earning' else 'bg-red-500'
@@ -121,7 +121,7 @@ def dashboard():
                             tx.delete_tx(tx_id=transaction['id'], month=app.storage.user.get('month'))
                             ui.notify('Transaction Deleted', type='positive')
                             app.state.show_transactions.refresh()
-                            app.state.update_budget_func()
+                            app.state.update_budget_func.refresh()
                         ui.button(icon='delete', on_click=delete_transaction).props('flat dense round')
     
         app.state.show_transactions = show_transactions

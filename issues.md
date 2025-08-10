@@ -1,3 +1,4 @@
 Problem with login page on mobile
-Problem with deleting transactions (Savings get deleted wven though theyre not shown )
-Make everything component-based 
+!!!Problem with deleting transactions (Savings get deleted wven though theyre not shown )
+!!Make everything component-based
+!!Turn CSS into classes in another file

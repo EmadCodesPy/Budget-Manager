@@ -145,11 +145,19 @@ class Transaction():
         conn.commit()
         conn.close()
 
-    def get_tx(self, month: str) -> dict:
+    def get_tx(self, month: str, incl_savings: bool = False) -> dict:
         """Getting the user transactions in a certain month. Gets the [id, name, type, amount, month, created_at]"""
         conn = self.db.get_connection()
         c = conn.cursor()
-        c.execute('SELECT id, name, type, amount, month, created_at FROM transactions WHERE username=? AND month=?', (self.username, month))
+        #Savings included
+        if incl_savings:
+            c.execute('SELECT id, name, type, amount, month, created_at FROM transactions WHERE username=? AND month=?', (self.username, month))
+            columns = [col[0] for col in c.description]
+            all_transactions = [dict(zip(columns, row)) for row in c.fetchall()]
+            conn.close()
+            return all_transactions
+        #Savings not included
+        c.execute('SELECT id, name, type, amount, month, created_at FROM transactions WHERE username=? AND month=? AND type<>?', (self.username, month, 'Savings'))
         columns = [col[0] for col in c.description]
         all_transactions = [dict(zip(columns, row)) for row in c.fetchall()]
         conn.close()
@@ -166,11 +174,6 @@ class Transaction():
             conn.close()
             return
         
-        #Select total budget for a user
-        c.execute('SELECT total_budget FROM users WHERE username=?', (self.username,))
-        #Comma exists because it returns a tuple. If there is no comma it will not unpack the tuple and current_budget[0] will need to be used
-        (current_total_budget,) = c.fetchone()
-
         #Select transaction info for a transaction
         c.execute('SELECT type, amount FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
         tx_row = c.fetchone()
@@ -191,10 +194,8 @@ class Transaction():
                 new_monthly_budget = current_monthly_budget + amount
             elif type_ == 'Earning':
                 new_monthly_budget = current_monthly_budget - amount
-            #Update the total budget
-            #c.execute('UPDATE users SET total_budget=? WHERE username=?', (new_total_budget, self.username))
-            c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (new_monthly_budget, self.username, month))
-        
+            
+            c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (new_monthly_budget, self.username, month))        
             c.execute('DELETE FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
         
         conn.commit()

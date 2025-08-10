@@ -1,4 +1,7 @@
 Problem with login page on mobile
-!!!Problem with deleting transactions (Savings get deleted wven though theyre not shown )
 !!Make everything component-based
+    Budget-done
+    Dahsboard-X
+    Account-done
+    login-done
 !!Turn CSS into classes in another file

@@ -1,4 +1,4 @@
-from nicegui import ui, app
+from nicegui import ui
 from pages.login_page import login_page
 from pages.dashboard import dashboard
 from pages.budget_page import budget_page

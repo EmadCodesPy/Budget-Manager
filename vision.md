@@ -2,6 +2,7 @@ The web app is a budget manager made using OOP, sqlite3 and streamlit:
 -Need add to savings
         savings table, has: amount, month, username
 -Be able to spend or add money to total budget without removing all tx
+-Make currency changable
 -~~Need to add edit account stuff~~
 -~~Add dark mode to account page~~
 -~~It must be able to CRUD (create, read, update, delete)~~

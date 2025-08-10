@@ -4,16 +4,17 @@ from datetime import datetime
 import plotly.graph_objects as go
 import plotly.express as px
 from exceptions import UsernameInUseError
+from static.css.css_styling import Styling
 
 def account_cards():
-    card_bg ='bg-gradient-to-r from-cyan-400 to-blue-700 opactiy-50 shadow-2xl p-6 w-full flex-1 text-white transition ease-in-out hover:-translate-y-1 hover:scale-105'    
+    #card_bg ='bg-gradient-to-r from-cyan-400 to-blue-700 opactiy-50 shadow-2xl p-6 w-full flex-1 text-white transition ease-in-out hover:-translate-y-1 hover:scale-105'    
     tx = Transaction(app.storage.user.get('username'))
     
     with ui.column().classes('w-full items-center'):
         #Account details row
         with ui.row().classes('w-full justify-between max-w-5xl'):
             #Account detials whole card
-            with ui.card().classes('items-center w-full py-8').classes(card_bg):
+            with ui.card().classes('items-center w-full py-8').classes(Styling.card()):
                 with ui.row().classes('justify-between w-full'):
                     user = User(app.storage.user.get('username'), app.storage.user.get('name'))
                     #Username + name + username_edit + name_edit
@@ -47,7 +48,7 @@ def account_cards():
 
                         #Name
                         with ui.row().classes('gap-2 items-center'):
-                            ui.label(f"Name: {app.storage.user.get('name')}").classes('text-lg text-white')
+                            ui.label(f"Name: {app.storage.user.get('name')}").classes('text-lg')
                             
                             with ui.dialog() as edit_name_dialog, ui.card().classes('items-center gap-0'):
                                 ui.label('Edit name below').classes('font-semibold text-xl')
@@ -93,7 +94,7 @@ def account_cards():
         #Stat card row
         with ui.row().classes('w-full max-w-5xl justify-around items-center'):
             #Account total budget
-            with ui.card().classes(card_bg):
+            with ui.card().classes(Styling.card()):
                 with ui.column().classes('w-full items-center'):
                     ui.icon('edit', size='1.2rem').classes('self-start absolute top-3 left-3 p-2 opacity-70').on('click', handler=lambda: ui.navigate.to('/budget'))\
                     .classes('hover:bg-white/20 rounded-full cursor-pointer').tooltip('Edit')
@@ -102,14 +103,14 @@ def account_cards():
                     ui.label(f'€{total_budget:.1f}').classes('text-xl')
                     ui.label('Total Budget').classes('text-2xl')
             #Account months budget
-            with ui.card().classes(card_bg):
+            with ui.card().classes(Styling.card()):
                 with ui.column().classes('w-full items-center'):
                     ui.icon('money', size='2rem')
                     monetly_budget = tx.get_fixed_monthly_budget()
                     ui.label(f'€{monetly_budget:.1f}').classes('text-xl')
                     ui.label('This months budget').classes('text-2xl')
             #Account months Spending
-            with ui.card().classes(card_bg):
+            with ui.card().classes(Styling.card()):
                 with ui.column().classes('w-full items-center'):
                     ui.icon('trending_down', size='2rem')
                     month = datetime.now().strftime('%Y-%B')
@@ -122,7 +123,7 @@ def account_cards():
             #Includes: Month overview + Overview Statistics + budget progress
             with ui.column().classes('w-full flex-1'):
                 #Month overview
-                with ui.card().classes(card_bg):
+                with ui.card().classes(Styling.card()):
                     with ui.column().classes('w-full'):
                         ui.label('Month Overview').classes('self-center text-2xl underline underline-offset-8')
                         months_unsorted = tx.get_months()
@@ -180,7 +181,7 @@ def account_cards():
                         update_overview()
                 
                 # Includes: Recent transactions + Budget progess 
-                with ui.card().classes(card_bg):
+                with ui.card().classes(Styling.card()):
                     with ui.row().classes('w-full pb-1'):
                         #Recent transactions
                         with ui.column().classes('w-full flex-1'):
@@ -214,7 +215,7 @@ def account_cards():
 
             # Month statistics
             with ui.column().classes('w-full flex-1 h-full max-h-'):
-                with ui.card().classes(card_bg):
+                with ui.card().classes(Styling.card()):
                     ui.label('Month statistics').classes('self-center text-2xl underline underline-offset-8')
                     piechart_container = ui.column().classes('w-full max-w-lg')
                     #Render piechart

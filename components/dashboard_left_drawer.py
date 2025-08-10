@@ -1,12 +1,12 @@
 from nicegui import ui, app
 from models import Transaction
-
+from static.css.css_styling import Styling
 
 
 def left_drawer():
     with ui.left_drawer(top_corner=True, bottom_corner=True, elevated=True, value=True):
-        ui.label('MoneyManager').classes('bg-gradient-to-r from-cyan-400 to-blue-700')\
-                .classes(f'bg-clip-text text-transparent text-4xl')
+        Styling.logo()
+        
         ui.markdown(f"**You are signed in as** {app.storage.user.get('username')}")
         def account():
             ui.navigate.to('/account')

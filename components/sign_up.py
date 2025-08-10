@@ -1,6 +1,7 @@
 from nicegui import ui, app
 from models import User
 from exceptions import UsernameInUseError
+from static.css.css_styling import Styling
 
 def sign_up():
                 
@@ -27,4 +28,4 @@ def sign_up():
                     return
 
             ui.button('Sign Up', on_click=handle_signup).classes('w-full bg-blue-500 text-white hover-bg-blue-600')\
-            .classes('transition ease-in-out duration-150 hover:-translate-y-1 hover:scale-105')
+            .classes(Styling.hover())

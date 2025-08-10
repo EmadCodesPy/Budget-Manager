@@ -1,6 +1,6 @@
 from nicegui import ui, app
 from models import Transaction
-
+from static.css.css_styling import Styling
 
 
 def transactions():

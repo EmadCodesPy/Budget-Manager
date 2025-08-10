@@ -1,13 +1,13 @@
 from nicegui import ui, app
 from models import Transaction
+from static.css.css_styling import Styling
 
 def budget():
     with ui.column().classes('w-screen h-screen items-center justify-center'):
-            ui.label('MoneyManager').classes('bg-gradient-to-r from-cyan-400 to-blue-700')\
-                    .classes(f'bg-clip-text text-transparent text-4xl').tooltip('Back to account').on(type='click', handler=lambda: ui.navigate.to('/account'))\
-                    .classes('transition ease-in-out hover:-translation-y-1 hover:scale-105')
-            
+            Styling.logo().classes(Styling.hover())\
+                .tooltip('Back to account').on(type='click', handler=lambda: ui.navigate.to('/account'))      
             ui.label('Click above to go back').classes('text-sm text-grey')
+            
             with ui.card().classes('w-screen max-w-sm shadow-2xl'):
                 tx = Transaction(app.storage.user.get('username'))
                 ui.label('Please allocate your budget').classes('font-semibold text-2xl')

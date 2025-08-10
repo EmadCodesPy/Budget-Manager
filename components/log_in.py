@@ -1,6 +1,6 @@
 from nicegui import ui, app
 from models import User
-
+from static.css.css_styling import Styling
 
 def login():
     
@@ -29,4 +29,4 @@ def login():
                 ui.navigate.to('/dashboard')
             
             ui.button('Log In', on_click=handle_login).classes('mt-4 w-full bg-blue-500 text-white hover:bg-blue-600')\
-                .classes('transition ease-in-out duration-150 hover:-translate-y-1 hover:scale-105')
+                .classes(Styling.hover())

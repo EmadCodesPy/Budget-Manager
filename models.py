@@ -255,7 +255,7 @@ class Transaction():
         c.execute('SELECT total_budget FROM users WHERE username=?', (self.username,))
         result = c.fetchone()
         conn.close()
-        if result[0] is None:
+        if result is None:
             return 0
         return result[0]
 
@@ -317,7 +317,7 @@ class Transaction():
         return most_recent_tx
 
     def budget_progress(self, include_numbers: bool = False) -> int:
-        """Returns the ratio of amount spent and total budget (ratio). If include_numbers is True, it will also return the amount spend and the total_budget (ratio, amount_spent, total_budget)"""
+        """Returns the ratio of amount spent and total budget. If include_numbers is True, it will also return the amount_spent and the total_budget (ratio, amount_spent, total_budget)"""
         conn = self.db.get_connection()
         c = conn.cursor()
         c.execute('SELECT total_budget FROM users WHERE username=?', (self.username,))
@@ -331,9 +331,41 @@ class Transaction():
             return ratio, amount_spent, total_budget[0]
         return ratio
 
+    def get_deductable_months(self, include_month_names: bool = False) -> int | list:
+        """Returns the number of months that you can deduct an amount from. Meaning you cant deduct from months that have passed but can from future months
+        
+           If include_month_names is True, the return will include (len(months): int, all_months: list)
+        """
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        current_month = datetime.datetime.today().strftime('%Y-%B')
+        c.execute('SELECT month FROM monthly_budget WHERE username=?', (self.username,))
+        all_months = sorted([x[0] for x in c.fetchall()], key=lambda x: datetime.datetime.strptime(x, '%Y-%B'))
+        conn.close()
+        month_index = all_months.index(current_month)
+        months = all_months[month_index:]
+        if include_month_names:
+            return len(months), all_months
+        return len(months)
+
+    def deduct_from_months(self, total_amount: int, months: int, name: str) -> None:
+        """Deduct total_amount from the number of months provided"""
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        amount_to_deduct = total_amount/months
+        deductable_months, all_months = self.get_deductable_months(include_month_names=True)
+        months_to_deduct_from = all_months[:months]
+        for month in months_to_deduct_from:
+            balance = self.get_monthly_budget(month=month)
+            final_balance = balance-amount_to_deduct
+            c.execute('UPDATE monthly_budget SET amount=? WHERE month=? AND username=?', (final_balance, month, self.username))
+            c.execute('INSERT INTO transactions (name, type, username, amount, month) VALUES (?,?,?,?,?)', (name, 'Spending', self.username, amount_to_deduct, month))
+            conn.commit()
+        conn.close()
+        
 
 if __name__ == '__main__':
     user = User.login('test', '1')
     tx = Transaction(user.username)
-    tx.delete_tx(all=True)
+    tx.deduct_from_months(6, 3)
     pass

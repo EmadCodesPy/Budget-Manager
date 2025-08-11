@@ -189,26 +189,26 @@ def account_cards():
                             ui.label('Recent Transactions')
                             ui.separator().classes('bg-white')
                             for name, amount, type_ in recent_transactions:
-                                with ui.column().classes('flex-1 w-full max-w-32'):
+                                with ui.column().classes('flex-1 w-full'):
                                     with ui.row().classes('w-full items-center gap-2'):
                                         bg_color = 'bg-red-700 rounded-md px-2' if type_ == 'Spending' else 'bg-green-700 rounded-md px-2'
                                         ui.icon('fiber_manual_record', size='0.6rem').classes('text-gray')
                                         ui.label(name)
                                         with ui.column().classes('w-full flex-1 items-end'):
                                             with ui.element('div').classes(bg_color):
-                                                ui.label(f'€{amount}')
+                                                ui.label(f'€{amount:.2f}')
                         #Budget progress
                         with ui.column().classes('w-full flex-1'):
                             ui.label('Budget Progress')
                             ui.separator().classes('w-full bg-white')
-                            with ui.row().classes('w-full justify-between items-center'):
-                                with ui.column().classes('w-full h-full flex-1 justify-center'):
+                            with ui.row().classes('w-full items-center '):
+                                with ui.column().classes('w-full h-full flex-1 justify-center items-center '):
                                     budget_progress, amount_spent_progress, total_budget_progress= tx.budget_progress(include_numbers=True)
                                     ratio_percentage = round(budget_progress, 3)
-                                    ratio = round(budget_progress, 1) 
-                                    progress_bar = '█'*int(ratio*10) + '▒'*(10-int(ratio*10))
+                                    ratio = round(budget_progress, 1)
+                                    progress_bar = '█'*int(ratio*10) + '▒'*(10-int(ratio*10)) if ratio < 1 else '█'*10
                                     ui.markdown(progress_bar).classes('font-bold')
-                                with ui.column().classes('flex-1'):
+                                with ui.column().classes('flex-1 pr-8 truncate ...'):
                                     ui.label(f'{ratio_percentage*100:.1f}%')
                             with ui.row().classes('justify-center w-full pt-3'):
                                 ui.label(f'€{amount_spent_progress} / €{total_budget_progress}')

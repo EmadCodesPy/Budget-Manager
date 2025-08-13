@@ -112,11 +112,11 @@ def account_cards():
             #Account months Spending
             with ui.card().classes(Styling.card()):
                 with ui.column().classes('w-full items-center'):
-                    ui.icon('trending_down', size='2rem')
+                    ui.icon('savings', size='2rem')
                     month = datetime.now().strftime('%Y-%B')
-                    spending = tx.get_monthly_cash_flow(type='Spending', month=month)
+                    spending = tx.get_total_savings()
                     ui.label(f'€{spending:.1f}').classes('text-xl')
-                    ui.label('This months spending').classes('text-2xl')
+                    ui.label('Savings').classes('text-2xl')
 
         #Bottom stat rows
         with ui.row().classes('w-full max-w-5xl justify-between'):

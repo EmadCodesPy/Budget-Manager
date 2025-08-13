@@ -26,15 +26,8 @@ def left_drawer():
             .classes('opacity-60 -m-3 hover:bg-gray-400/20 rounded-full cursor-pointer').tooltip('close')
             savings_header()
             savings_body()
-        
-        def handle_dialog():
-            tx = Transaction(app.storage.user.get('username'))
-            if tx.get_savings() is None:
-                ui.notify('You have no savings', type='info')
-                return
-            savings_dialog.open()
 
-        ui.button('Savings', on_click=handle_dialog).props('push rounded').classes('w-full bg-green')           
+        ui.button('Savings', on_click=savings_dialog.open).props('push rounded').classes('w-full bg-green')           
 
         with ui.card().classes('justify-center shadow-xl w-full mt-6'):
             ui.markdown('### Add Transaction')

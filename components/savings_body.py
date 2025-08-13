@@ -7,7 +7,7 @@ def savings_body():
     @ui.refreshable
     def show_savings():
         all_savings = tx.get_savings()
-        if all_savings is None:
+        if all_savings == 0:
             return
         #Transaction card below
         for transaction in all_savings:

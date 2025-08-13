@@ -365,7 +365,7 @@ class Transaction():
         conn.close()
         
     def get_savings(self) -> list:
-        """Returns a dictionary of all the savings. Return None if no savings"""
+        """Returns a dictionary of all the savings. Return 0 if no savings"""
         conn = self.db.get_connection()
         c = conn.cursor()
         c.execute('SELECT * FROM transactions WHERE type=? AND username=? ORDER BY created_at DESC', ('Savings', self.username))
@@ -373,18 +373,18 @@ class Transaction():
         result = [dict(zip(columns, row)) for row in c.fetchall()]
         conn.close()
         if result == []:
-            return None
+            return 0
         return result
 
     def get_total_savings(self) -> int:
-        """Gets ths sum of all the savings. Returns None if no savings"""
+        """Gets ths sum of all the savings. Returns 0 if no savings"""
         conn = self.db.get_connection()
         c = conn.cursor()
         c.execute('SELECT amount FROM transactions WHERE type=? AND username=?', ('Savings', self.username))
         result = c.fetchall()
         conn.close()
         if result == []:
-            return None
+            return 0
         total_savings = sum([x[0] for x in result])
         return total_savings
 

@@ -17,19 +17,21 @@ def login_page():
     ''')
 
     #Tabs
-    with ui.row().classes('w-screen items-center justify-center'):
-        with ui.tabs().classes('rounded-lg border') as tabs:
-            log_in = ui.tab('Login')
-            signup = ui.tab('Sign Up')
+    with ui.row().classes('w-full items-center justify-center'):
+        with ui.column().classes('w-full h-full items-center'):
+            with ui.tabs().classes('rounded-lg z-10') as tabs:
+                log_in = ui.tab('Login')
+                signup = ui.tab('Sign Up')
+            Styling.moneymanager_text(column_classes='mt-24')
+
 
     #Tab content
-    with ui.tab_panels(tabs, value=log_in):
+    with ui.tab_panels(tabs, value=log_in).classes('w-full bg-transparent').style('pointer-events: none;'):
         with ui.tab_panel(log_in):
-            Styling.moneymanager_text()
+            #Styling.moneymanager_text()
             login()
-            pass
         with ui.tab_panel(signup):
-            Styling.moneymanager_text()
+
+            #Styling.moneymanager_text()
             sign_up()
-            pass
 

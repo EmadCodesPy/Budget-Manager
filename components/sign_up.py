@@ -5,8 +5,8 @@ from static.css.css_styling import Styling
 
 def sign_up():
                 
-    with ui.column().classes('w-screen justify-center items-center'):
-        with ui.card().classes('w-full max-w-sm shadow-2xl mt-32 mb-40'):
+    with ui.column().classes('w-full h-full justify-center items-center z-20'):
+        with ui.card().classes('w-full max-w-sm shadow-2xl mt-32 mb-40 pointer-events-auto'):
             ui.label('Sign Up').classes('text-2xl font-bold mb-2 text-center')
 
             username_input = ui.input('Username').classes('w-full caret-blue-500')

@@ -3,5 +3,4 @@ __pycache__/
 .nicegui
 vision.md
 issues.md
-testing.py
 test.py

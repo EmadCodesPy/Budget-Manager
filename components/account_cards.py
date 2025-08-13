@@ -152,10 +152,6 @@ def account_cards():
                             update_chart = getattr(app.state, 'piechart', None)
                             if update_chart:
                                 update_chart(selected_month)
-                                
-                            
-                            
-                            
 
                         #Makes the dropdown text white
                         ui.add_head_html('''
@@ -167,7 +163,7 @@ def account_cards():
                                         </style>
                                         ''')
                         month_dropdown = ui.select(months, value=selected_month, on_change=update_overview).classes('text-l')
-                        
+
                         #Overview statisitcs
                         monthly_budget_label = ui.label().classes('text-xl')
                         amount_spent_label = ui.label().classes('text-xl')
@@ -175,8 +171,8 @@ def account_cards():
                         #Savings icon + Remaining amount
                         with ui.row().classes('items-center'):
                             amount_remaining_label = ui.label().classes('text-xl')
-                            ui.icon('savings', size='1.5rem').tooltip('Add to savings').classes('hover:bg-white/20 rounded-full p-0.5 -ml-4')\
-                            .on('click', handler=lambda: ui.notify('Working on this'))
+                            # ui.icon('savings', size='1.5rem').tooltip('Add to savings').classes('hover:bg-white/20 rounded-full p-0.5 -ml-4')\
+                            # .on('click', handler=lambda: ui.notify('Working on this'))
                         
                         update_overview()
                 
@@ -208,7 +204,7 @@ def account_cards():
                                     ratio = round(budget_progress, 1)
                                     progress_bar = '█'*int(ratio*10) + '▒'*(10-int(ratio*10)) if ratio < 1 else '█'*10
                                     ui.markdown(progress_bar).classes('font-bold')
-                                with ui.column().classes('flex-1 pr-8 truncate ...'):
+                                with ui.column().classes('flex-none pr-8 truncate ...'):
                                     ui.label(f'{ratio_percentage*100:.1f}%')
                             with ui.row().classes('justify-center w-full pt-3'):
                                 ui.label(f'€{amount_spent_progress} / €{total_budget_progress}')

@@ -1,26 +1,42 @@
 from nicegui import ui, app
 from models import Transaction
 from static.css.css_styling import Styling
-
+from components.savings_header import savings_header
+from components.savings_body import savings_body
 
 def left_drawer():
-    with ui.left_drawer(top_corner=True, bottom_corner=True, elevated=True, value=True):
+    with ui.left_drawer(top_corner=True, bottom_corner=True, elevated=True, value=True, fixed=True):
         Styling.logo()
         
         ui.markdown(f"**You are signed in as** {app.storage.user.get('username')}")
         def account():
             ui.navigate.to('/account')
             return
-        ui.button('Account', on_click=account).classes('w-full').props('rounded outline')
+        ui.button('Account', on_click=account).classes('w-full').props('push rounded')
         def logout():
             ui.navigate.to('/')
             app.storage.user['logged_in'] = False
             app.storage.user['username'] = None
             app.storage.user['name'] = None
             return
-        ui.button('Logout', on_click=logout).classes('bg-red w-full text-white').props('rounded outline')
+        ui.button('Logout', on_click=logout).classes('bg-red w-full text-white').props('push rounded')
 
-        with ui.card().classes('justify-center shadow-2xl w-full mt-6'):
+        with ui.dialog() as savings_dialog, ui.card().classes('w-full h-full'):
+            ui.icon('close', size='1.5rem').on('click', handler=savings_dialog.close)\
+            .classes('opacity-60 -m-3 hover:bg-gray-400/20 rounded-full cursor-pointer').tooltip('close')
+            savings_header()
+            savings_body()
+        
+        def handle_dialog():
+            tx = Transaction(app.storage.user.get('username'))
+            if tx.get_savings() is None:
+                ui.notify('You have no savings', type='info')
+                return
+            savings_dialog.open()
+
+        ui.button('Savings', on_click=handle_dialog).props('push rounded').classes('w-full bg-green')           
+
+        with ui.card().classes('justify-center shadow-xl w-full mt-6'):
             ui.markdown('### Add Transaction')
             name_input = ui.input('Name',placeholder='...').classes('w-full')
             amount_input = ui.number("Amount", min=1, format='%.2f').classes('w-full pb-4')
@@ -51,10 +67,15 @@ def left_drawer():
                 ui.notify('Transaction added', type='positive')
                 update_func = getattr(app.state, 'update_budget_func', None)
                 show_tx = getattr(app.state, 'show_transactions', None)
+                update_sv = getattr(app.state, 'update_savings', None)
+                show_sv = getattr(app.state, 'show_savings', None)
                 if update_func:
                     update_func()
                     show_tx.refresh()
+                    update_sv()
+                    show_sv.refresh()
+
             
-            ui.button('Submit', on_click=handle_transaction).classes('w-full')\
-            .classes('transition ease-in-out duration-150 hover:-translate-y-1 hover:scale-105')
-                    
+            ui.button('Submit', on_click=handle_transaction).classes('w-full').props('push')
+
+        

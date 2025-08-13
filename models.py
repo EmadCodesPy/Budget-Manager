@@ -151,13 +151,13 @@ class Transaction():
         c = conn.cursor()
         #Savings included
         if incl_savings:
-            c.execute('SELECT id, name, type, amount, month, created_at FROM transactions WHERE username=? AND month=?', (self.username, month))
+            c.execute('SELECT id, name, type, amount, month, created_at FROM transactions WHERE username=? AND month=? ORDER BY created_at DESC', (self.username, month))
             columns = [col[0] for col in c.description]
             all_transactions = [dict(zip(columns, row)) for row in c.fetchall()]
             conn.close()
             return all_transactions
         #Savings not included
-        c.execute('SELECT id, name, type, amount, month, created_at FROM transactions WHERE username=? AND month=? AND type<>?', (self.username, month, 'Savings'))
+        c.execute('SELECT id, name, type, amount, month, created_at FROM transactions WHERE username=? AND month=? AND type<>? ORDER BY created_at DESC', (self.username, month, 'Savings'))
         columns = [col[0] for col in c.description]
         all_transactions = [dict(zip(columns, row)) for row in c.fetchall()]
         conn.close()
@@ -178,10 +178,6 @@ class Transaction():
         c.execute('SELECT type, amount FROM transactions WHERE id=? AND username=?', (tx_id, self.username))
         tx_row = c.fetchone()
 
-        #Select amount in monthly_budget
-        c.execute('SELECT amount FROM monthly_budget WHERE username=? AND month=?', (self.username, month))
-        (current_monthly_budget,) = c.fetchone()
-
         #Update the total_budget from the users table and amount from the monthly_budget table
         if tx_row:
             type_, amount = tx_row
@@ -190,6 +186,11 @@ class Transaction():
                 conn.commit()
                 conn.close()
                 return
+            
+            #Select amount in monthly_budget
+            c.execute('SELECT amount FROM monthly_budget WHERE username=? AND month=?', (self.username, month))
+            (current_monthly_budget,) = c.fetchone()
+            
             if type_ == 'Spending':  
                 new_monthly_budget = current_monthly_budget + amount
             elif type_ == 'Earning':
@@ -363,6 +364,29 @@ class Transaction():
             conn.commit()
         conn.close()
         
+    def get_savings(self) -> list:
+        """Returns a dictionary of all the savings. Return None if no savings"""
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT * FROM transactions WHERE type=? AND username=? ORDER BY created_at DESC', ('Savings', self.username))
+        columns = [col[0] for col in c.description]
+        result = [dict(zip(columns, row)) for row in c.fetchall()]
+        conn.close()
+        if result == []:
+            return None
+        return result
+
+    def get_total_savings(self) -> int:
+        """Gets ths sum of all the savings. Returns None if no savings"""
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        c.execute('SELECT amount FROM transactions WHERE type=? AND username=?', ('Savings', self.username))
+        result = c.fetchall()
+        conn.close()
+        if result == []:
+            return None
+        total_savings = sum([x[0] for x in result])
+        return total_savings
 
 if __name__ == '__main__':
     user = User.login('test', '1')

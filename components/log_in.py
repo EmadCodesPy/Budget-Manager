@@ -28,5 +28,5 @@ def login():
                 
                 ui.navigate.to('/dashboard')
             
-            ui.button('Log In', on_click=handle_login).classes('mt-4 w-full bg-blue-500 text-white hover:bg-blue-600')\
+            ui.button('Log In', on_click=handle_login, icon='login').classes('mt-4 w-full bg-blue-500 text-white hover:bg-blue-600')\
                 .classes(Styling.hover())

@@ -20,4 +20,4 @@ def show_budget_page():
 def show_account_page():
     account_page()
 
-ui.run(storage_secret='test')
+ui.run(storage_secret='EmadsBudgetManager')

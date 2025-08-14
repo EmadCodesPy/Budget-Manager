@@ -13,6 +13,7 @@ def left_drawer():
             ui.navigate.to('/account')
             return
         ui.button('Account', on_click=account).classes('w-full').props('push rounded')
+    
         def logout():
             ui.navigate.to('/')
             app.storage.user['logged_in'] = False
@@ -20,10 +21,11 @@ def left_drawer():
             app.storage.user['name'] = None
             return
         ui.button('Logout', on_click=logout).classes('bg-red w-full text-white').props('push rounded')
-
+        
+        #Savings dialog
         with ui.dialog() as savings_dialog, ui.card().classes('w-full h-full'):
             ui.icon('close', size='1.5rem').on('click', handler=savings_dialog.close)\
-            .classes('opacity-60 -m-3 hover:bg-gray-400/20 rounded-full cursor-pointer').tooltip('close')
+            .classes('opacity-60 -m-3 hover:bg-gray-400/20 rounded-full cursor-pointer')
             savings_header()
             savings_body()
 
@@ -58,10 +60,10 @@ def left_drawer():
                 tx = Transaction(app.storage.user.get('username'))
                 tx.add_tx(name_input.value, type_tx.value, amount_input.value, app.storage.user.get('month'))
                 ui.notify('Transaction added', type='positive')
-                update_func = getattr(app.state, 'update_budget_func', None)
-                show_tx = getattr(app.state, 'show_transactions', None)
-                update_sv = getattr(app.state, 'update_savings', None)
-                show_sv = getattr(app.state, 'show_savings', None)
+                update_func = getattr(app.state, 'update_budget_func', None) #Updates the header
+                show_tx = getattr(app.state, 'show_transactions', None) #Updates the transactions on the main page
+                update_sv = getattr(app.state, 'update_savings', None) #Updates the savings header
+                show_sv = getattr(app.state, 'show_savings', None) #Updates the savings on the savings card
                 if update_func:
                     update_func()
                     show_tx.refresh()

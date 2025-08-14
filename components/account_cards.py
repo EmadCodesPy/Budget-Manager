@@ -139,7 +139,7 @@ def account_cards():
                             amount_remaining = tx.get_monthly_budget(selected_month)
                             
 
-                            monthly_budget_label.text = f'Monthly Budget: €{monthly_budget}'
+                            monthly_budget_label.text = f'Monthly Budget: €{monthly_budget:.1f}'
                             amount_spent_label.text = f'Amount Spent: €{amount_spent:.1f}'
                             amount_earned_label.text = f'Amount Earned: €{amount_earned:.1f}'
                             if amount_remaining < 0:

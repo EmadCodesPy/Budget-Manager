@@ -1,7 +1,7 @@
 from nicegui import ui, app
-from components.budget import budget
+from components.new_budget_card import new_budget
 
-def budget_page():
+def new_budget_page():
     
     #Dark mode check
     if app.storage.user.get('dark'):
@@ -15,7 +15,7 @@ def budget_page():
             return
     
     #Budget from components folder
-    budget()
+    new_budget()
 
 
 

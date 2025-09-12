@@ -32,7 +32,8 @@ def left_drawer():
         ui.button('Savings', on_click=savings_dialog.open).props('push rounded').classes('w-full bg-green')           
 
         with ui.card().classes('justify-center shadow-xl w-full mt-6'):
-            ui.markdown('### Add Transaction')
+            ui.markdown('### Add Transaction').classes('self-center')
+            ui.button('Special Transaction').classes('w-full -mt-4 text-xs').props('dense').on(type='click') #For making recurring payments and such
             name_input = ui.input('Name',placeholder='...').classes('w-full')
             amount_input = ui.number("Amount", min=1, format='%.2f').classes('w-full pb-4')
             

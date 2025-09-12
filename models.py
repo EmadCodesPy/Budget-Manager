@@ -335,7 +335,7 @@ class Transaction():
     def get_deductable_months(self, include_month_names: bool = False) -> int | list:
         """Returns the number of months that you can deduct an amount from. Meaning you cant deduct from months that have passed but can from future months
         
-           If include_month_names is True, the return will include (len(months): int, all_months: list)
+            If include_month_names is True, the return will include 1. len(months): int  2.all_months: list)
         """
         conn = self.db.get_connection()
         c = conn.cursor()
@@ -388,6 +388,16 @@ class Transaction():
         total_savings = sum([x[0] for x in result])
         return total_savings
 
+    def reccuring_tx(self, amount: int, months: int, name: str, _type: str = ["Spending", "Earning"]) -> None:
+        conn = self.db.get_connection()
+        c = conn.cursor()
+        deductable_months, all_months = self.get_deductable_months(include_month_names=True)
+        months_to_deduct_from = all_months[:months]
+        for month in months_to_deduct_from:
+            c.execute("INSERT INTO transactions (name, type, username, amount, month) VALUES (?,?,?,?,?)", (name, _type, self.username, amount, month))
+            conn.commit()
+        conn.close()
+        pass
 if __name__ == '__main__':
     user = User.login('test', '1')
     tx = Transaction(user.username)

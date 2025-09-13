@@ -28,10 +28,7 @@ def login_page():
     #Tab content
     with ui.tab_panels(tabs, value=log_in).classes('w-full bg-transparent').style('pointer-events: none;'):
         with ui.tab_panel(log_in):
-            #Styling.moneymanager_text()
             login()
         with ui.tab_panel(signup):
-
-            #Styling.moneymanager_text()
             sign_up()
 

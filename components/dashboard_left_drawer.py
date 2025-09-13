@@ -33,7 +33,7 @@ def left_drawer():
 
         with ui.card().classes('justify-center shadow-xl w-full mt-6'):
             ui.markdown('### Add Transaction').classes('self-center')
-            ui.button('Special Transaction').classes('w-full -mt-4 text-xs').props('dense').on(type='click') #For making recurring payments and such
+            ui.button('Special Transaction').classes('w-full -mt-4 text-xs').props('dense').on(type='click', handler=lambda: ui.navigate.to('/edit_budget')) #For making recurring payments and such
             name_input = ui.input('Name',placeholder='...').classes('w-full')
             amount_input = ui.number("Amount", min=1, format='%.2f').classes('w-full pb-4')
             
@@ -46,7 +46,6 @@ def left_drawer():
                                 .q-btn-group .q-btn {
                                 font-size: 0.75rem;
                                 max-width: 78.6px;
-                                /*max-width: px;*/
                                 }
                                 </style>
                             """)

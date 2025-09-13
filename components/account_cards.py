@@ -207,7 +207,7 @@ def account_cards():
                                 with ui.column().classes('flex-none pr-8 truncate ...'):
                                     ui.label(f'{ratio_percentage*100:.1f}%')
                             with ui.row().classes('justify-center w-full pt-3'):
-                                ui.label(f'€{amount_spent_progress} / €{total_budget_progress}')
+                                ui.label(f'€{amount_spent_progress:.1f} / €{total_budget_progress:.1f}')
 
             # Month statistics
             with ui.column().classes('w-full flex-1 h-full max-h-'):
@@ -225,7 +225,7 @@ def account_cards():
                         with piechart_container:
                             tx_names, tx_amount = tx.tx_piechart(month)
                             if tx_names == []:
-                                ui.label('No Transactions yet').classes('text-red')
+                                ui.label('No spending yet').classes('text-red text-xl self-center')
                                 return
                             piechart_object = go.Figure(
                                                         data=[

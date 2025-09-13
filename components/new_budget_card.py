@@ -2,8 +2,8 @@ from nicegui import ui, app
 from models import Transaction
 from static.css.css_styling import Styling
 
-def make_new_budget():
-    with ui.column().classes('w-full h-full items-center justify-center'):
+def make_new_budget_card():
+    with ui.column().classes('w-full h-full items-center justify-center max-w-sm'):
         with ui.card().classes('w-full h-full items-center'):
             tx = Transaction(app.storage.user.get('username'))
             ui.label('Allocate new budget').classes('font-semibold text-xl')
@@ -35,7 +35,7 @@ def new_budget():
     if not tx.get_total_budget():
         with ui.row().classes('w-full h-full items-center justify-center'):
             with ui.column().classes('w-full h-full justify-center max-w-sm items-center mt-40'):
-                make_new_budget()
+                make_new_budget_card()
         return
 
     with ui.row().classes('w-full h-full items-center justify-center'):
@@ -43,5 +43,4 @@ def new_budget():
             Styling.logo().classes(Styling.hover()).classes('mt-32')\
             .tooltip('Back to account').on(type='click', handler=lambda: ui.navigate.to('/account'))      
             ui.label('Click above to go back').classes('text-sm text-grey')
-            make_new_budget()
-    
+            make_new_budget_card()

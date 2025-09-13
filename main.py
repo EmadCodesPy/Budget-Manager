@@ -3,6 +3,7 @@ from pages.login_page import login_page
 from pages.dashboard import dashboard
 from pages.new_budget_page import new_budget_page
 from pages.account_page import account_page
+from pages.edit_budget_page import edit_budget_page
 
 @ui.page('/')
 def show_login():
@@ -15,6 +16,7 @@ def show_dashboard():
 @ui.page('/budget')
 def show_budget_page():
     new_budget_page()
+    pass
 
 @ui.page('/account')
 def show_account_page():
@@ -22,6 +24,6 @@ def show_account_page():
     
 @ui.page('/edit_budget')
 def show_edit_budget_page():
-    pass
+    edit_budget_page()
 
 ui.run(storage_secret='EmadsBudgetManager')

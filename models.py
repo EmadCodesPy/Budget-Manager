@@ -134,14 +134,10 @@ class Transaction():
         c.execute('INSERT INTO transactions (name, type, username, amount, month) VALUES (?,?,?,?,?)', (name, type, self.username, amount, month))
         if type == 'Earning':
             monthly_budget = self.get_monthly_budget(month) + amount
-            #total_budget = self.get_total_budget() + amount
             c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (monthly_budget, self.username, month))
-            #c.execute('UPDATE users SET total_budget=? WHERE username=?', (total_budget, self.username))
         elif type == 'Spending':
             monthly_budget = self.get_monthly_budget(month) - amount
-            #total_budget = self.get_total_budget() - amount
             c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (monthly_budget, self.username, month))
-            #c.execute('UPDATE users SET total_budget=? WHERE username=?', (total_budget, self.username))
         conn.commit()
         conn.close()
 
@@ -388,16 +384,25 @@ class Transaction():
         total_savings = sum([x[0] for x in result])
         return total_savings
 
-    def reccuring_tx(self, amount: int, months: int, name: str, _type: str = ["Spending", "Earning"]) -> None:
+    def reccuring_tx(self, amount: int, months: int, name: str, _type: str = ["Spending", "Earning", "Savings"]) -> None:
         conn = self.db.get_connection()
         c = conn.cursor()
         deductable_months, all_months = self.get_deductable_months(include_month_names=True)
         months_to_deduct_from = all_months[:months]
         for month in months_to_deduct_from:
+            #Update monthly balance
+            if _type == 'Earning':
+                monthly_budget = self.get_monthly_budget(month) + amount
+                c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (monthly_budget, self.username, month))
+            elif _type == 'Spending':
+                monthly_budget = self.get_monthly_budget(month) - amount
+                c.execute('UPDATE monthly_budget SET amount=? WHERE username=? AND month=?', (monthly_budget, self.username, month))
+            #Commit the transaction
             c.execute("INSERT INTO transactions (name, type, username, amount, month) VALUES (?,?,?,?,?)", (name, _type, self.username, amount, month))
             conn.commit()
         conn.close()
         pass
+    
 if __name__ == '__main__':
     user = User.login('test', '1')
     tx = Transaction(user.username)
